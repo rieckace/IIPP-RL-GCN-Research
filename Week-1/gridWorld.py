@@ -1,3 +1,22 @@
+"""
+GridWorld Q-Learning Implementation
+
+This project implements a simple GridWorld environment and a Q-Learning
+agent from scratch to understand the fundamentals of Reinforcement Learning.
+
+Concepts Covered:
+- States and Actions
+- Reward Function
+- Exploration vs Exploitation
+- Q-Table
+- Q-Learning
+- Epsilon-Greedy Policy
+
+Author: Rikesh Yadav
+Internship: INEC Lab, Yuan Ze University
+Date: June 2026
+"""
+
 # Create the Environment
 
 import random
