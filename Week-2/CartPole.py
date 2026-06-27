@@ -1,5 +1,5 @@
 """
-CartPole DQN Implementation
+CartPole DQN Implementation — Fixed & Stable Version
 
 This project implements a Deep Q-Network (DQN) agent from scratch using PyTorch
 to solve the CartPole-v1 environment from OpenAI Gymnasium.
@@ -9,7 +9,7 @@ Concepts Covered:
 - Experience Replay Buffer
 - Target Network & Periodic Weight Updates
 - Epsilon-Greedy Exploration Strategy
-- Temporal Difference (TD) Learning
+- Gradient Clipping for Training Stability
 - Neural Network-based Q-Value Approximation
 
 Environment:
@@ -20,22 +20,22 @@ Environment:
 - Solved When : 50-episode average reward >= 475
 
 Key Hyperparameters:
-- Discount Factor (gamma)  : 0.99
-- Initial Epsilon           : 1.0  (full exploration)
-- Epsilon Decay             : 0.995
-- Minimum Epsilon           : 0.01 (1% exploration floor)
-- Learning Rate             : 0.001
-- Replay Buffer Capacity    : 10,000 transitions
-- Batch Size                : 64
-- Target Network Update     : Every 10 episodes
+- Discount Factor (gamma)    : 0.99
+- Initial Epsilon            : 1.0
+- Epsilon Decay              : 0.995
+- Minimum Epsilon            : 0.01
+- Learning Rate              : 0.0005  ← stabilized
+- Replay Buffer Capacity     : 50,000  ← larger memory
+- Batch Size                 : 64
+- Target Network Update      : Every 20 episodes ← more stable
+- Gradient Clipping          : 1.0 ← prevents exploding gradients
 
-Author   : Rikesh Yadav
-Lab      : INEC Laboratory, Yuan Ze University, Taiwan
-Program  : International Internship Pilot Program (IIPP)
+Author    : Rikesh Yadav
+Lab       : INEC Laboratory, Yuan Ze University, Taiwan
+Program   : International Internship Pilot Program (IIPP)
 Supervisor: Dr. Ihsan Ullah
-Date     : June 2026
+Date      : June 2026
 """
-
 
 import gymnasium as gym
 import torch
@@ -46,7 +46,7 @@ import random
 from collections import deque
 import matplotlib.pyplot as plt
 
-# ── 1. Neural Network (The "Q" in DQN) ──────────────────────────────
+# ── 1. Neural Network ────────────────────────────────────────────────
 class DQN(nn.Module):
     def __init__(self, state_size, action_size):
         super(DQN, self).__init__()
@@ -61,9 +61,9 @@ class DQN(nn.Module):
     def forward(self, x):
         return self.network(x)
 
-# ── 2. Replay Memory ─────────────────────────────────────────────────
+# ── 2. Replay Buffer ─────────────────────────────────────────────────
 class ReplayBuffer:
-    def __init__(self, capacity=10000):
+    def __init__(self, capacity=50000):
         self.buffer = deque(maxlen=capacity)
 
     def push(self, state, action, reward, next_state, done):
@@ -81,27 +81,22 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
 
-        # Hyperparameters
-        self.gamma = 0.99        # discount factor
-        self.epsilon = 1.0       # exploration rate
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.997
-        self.learning_rate = 0.001
-        self.batch_size = 64
-        self.target_update = 15  # update target every N episodes
+        self.gamma         = 0.99
+        self.epsilon       = 1.0
+        self.epsilon_min   = 0.01
+        self.epsilon_decay = 0.995
+        self.lr            = 0.0005
+        self.batch_size    = 64
+        self.target_update = 20
 
-        # Networks
-        self.q_network = DQN(state_size, action_size)
+        self.q_network      = DQN(state_size, action_size)
         self.target_network = DQN(state_size, action_size)
         self.target_network.load_state_dict(self.q_network.state_dict())
 
-        self.optimizer = optim.Adam(self.q_network.parameters(),
-                                    lr=self.learning_rate)
-        self.memory = ReplayBuffer()
-        self.steps = 0
+        self.optimizer = optim.Adam(self.q_network.parameters(), lr=self.lr)
+        self.memory    = ReplayBuffer(capacity=50000)
 
     def act(self, state):
-        # Epsilon-greedy: explore or exploit
         if random.random() < self.epsilon:
             return random.randrange(self.action_size)
         state_tensor = torch.FloatTensor(state).unsqueeze(0)
@@ -116,7 +111,7 @@ class DQNAgent:
         if len(self.memory) < self.batch_size:
             return
 
-        batch = self.memory.sample(self.batch_size)
+        batch                            = self.memory.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
 
         states      = torch.FloatTensor(np.array(states))
@@ -125,21 +120,19 @@ class DQNAgent:
         next_states = torch.FloatTensor(np.array(next_states))
         dones       = torch.FloatTensor(dones)
 
-        # Current Q values
         current_q = self.q_network(states).gather(1, actions.unsqueeze(1))
 
-        # Target Q values (frozen network)
         with torch.no_grad():
             max_next_q = self.target_network(next_states).max(1)[0]
-            target_q = rewards + self.gamma * max_next_q * (1 - dones)
+            target_q   = rewards + self.gamma * max_next_q * (1 - dones)
 
-        # Loss and backprop
         loss = nn.MSELoss()(current_q.squeeze(), target_q)
+
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.q_network.parameters(), 1.0)
         self.optimizer.step()
 
-        # Decay epsilon
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -148,38 +141,37 @@ class DQNAgent:
 
 # ── 4. Training Loop ─────────────────────────────────────────────────
 def train():
-    env = gym.make('CartPole-v1')
-    state_size = env.observation_space.shape[0]   # 4
-    action_size = env.action_space.n              # 2
+    env         = gym.make('CartPole-v1')
+    state_size  = env.observation_space.shape[0]
+    action_size = env.action_space.n
 
-    agent = DQNAgent(state_size, action_size)
-    episodes = 600
-    scores = []
+    agent    = DQNAgent(state_size, action_size)
+    episodes = 500
+    scores   = []
 
     for episode in range(episodes):
         state, _ = env.reset()
         total_reward = 0
 
         for step in range(500):
-            action = agent.act(state)
+            action                              = agent.act(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
-            done = terminated or truncated
+            done                                = terminated or truncated
 
             agent.remember(state, action, reward, next_state, done)
             agent.learn()
 
-            state = next_state
+            state        = next_state
             total_reward += reward
 
             if done:
                 break
 
-        # Update target network every N episodes
         if episode % agent.target_update == 0:
             agent.update_target()
 
         scores.append(total_reward)
-        avg = np.mean(scores[-50:])  # rolling average
+        avg = np.mean(scores[-50:])
 
         print(f"Episode {episode+1:3d} | "
               f"Score: {total_reward:6.1f} | "
@@ -192,19 +184,21 @@ def train():
 
     env.close()
 
-    # Plot results
-    plt.figure(figsize=(10, 5))
-    plt.plot(scores, alpha=0.4, label='Score per episode')
+    # ── Plot ─────────────────────────────────────────────────────────
+    plt.figure(figsize=(12, 5))
+    plt.plot(scores, alpha=0.4, color='steelblue', label='Score per episode')
     plt.plot(np.convolve(scores, np.ones(50)/50, mode='valid'),
-             label='50-episode average', linewidth=2)
-    plt.axhline(y=475, color='r', linestyle='--', label='Solved threshold')
+             color='darkorange', linewidth=2.5, label='50-episode average')
+    plt.axhline(y=475, color='red', linestyle='--',
+                linewidth=1.5, label='Solved threshold (475)')
     plt.xlabel('Episode')
     plt.ylabel('Score')
-    plt.title('DQN Training on CartPole-v1')
+    plt.title('DQN Training on CartPole-v1 — Fixed & Stable')
     plt.legend()
-    plt.savefig('dqn_results.png', dpi=150)
+    plt.tight_layout()
+    plt.savefig('dqn_results_fixed.png', dpi=150)
     plt.show()
-    print("📊 Plot saved as dqn_results.png")
+    print("📊 Plot saved as dqn_results_fixed.png")
 
 if __name__ == "__main__":
     train()
