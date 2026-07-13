@@ -1,43 +1,70 @@
-RESEARCH KNOWLEDGE MAP
+# Research Knowledge Map
 
-Machine Learning
-    ✓ Supervised Learning
-    ✓ Unsupervised Learning
-    ✓ Reinforcement Learning
+A structured overview of concepts and progress for **IIPP-RL-GCN Research**.
 
-Reinforcement Learning
-    ✓ Agent
-    ✓ Environment
-    ✓ State
-    ✓ Action
-    ✓ Reward
-    ✓ Policy
-    ✓ Episode
-    ✓ Time Step
+## Legend
 
-Q-Learning
-    ✓ Bellman Equation
-    ✓ Q-Table
-    ✓ Learning Rate (α)
-    ✓ Discount Factor (γ)
-    ✓ Exploration vs Exploitation
+- ✅ Complete
+- ⬜ In Progress / Pending
 
-Implementations
-    ✓ GridWorld
+---
 
-Deep Reinforcement Learning
-    ✓ Why Q-Learning fails
-    ✓ Curse of Dimensionality
-    ✓ DQN Motivation
+## 1) Machine Learning Foundations
 
-PyTorch
-    ✓ Python Lists
-    ✓ NumPy Arrays
-    ✓ PyTorch Tensors
-    ✓ Tensor Dimensionality
-    ✓ torch.tensor()
+- ✅ Supervised Learning
+- ✅ Unsupervised Learning
+- ✅ Reinforcement Learning
 
-Research Paper
-    ✓ Paper V1 Reviewed
-    □ Strengthen AI Methodology
-    □ Improve Experimental Evaluation
+## 2) Reinforcement Learning Fundamentals
+
+- ✅ Agent
+- ✅ Environment
+- ✅ State
+- ✅ Action
+- ✅ Reward
+- ✅ Policy
+- ✅ Episode
+- ✅ Time Step
+
+## 3) Q-Learning
+
+- ✅ Bellman Equation
+- ✅ Q-Table
+- ✅ Learning Rate (α)
+- ✅ Discount Factor (γ)
+- ✅ Exploration vs. Exploitation
+
+## 4) Implementations
+
+- ✅ GridWorld
+
+## 5) Deep Reinforcement Learning
+
+- ✅ Why Q-Learning Fails
+- ✅ Curse of Dimensionality
+- ✅ DQN Motivation
+
+## 6) PyTorch Foundations
+
+- ✅ Python Lists
+- ✅ NumPy Arrays
+- ✅ PyTorch Tensors
+- ✅ Tensor Dimensionality
+- ✅ `torch.tensor()`
+
+## 7) Research Paper Progress
+
+- ✅ Paper V1 Reviewed
+- ⬜ Strengthen AI Methodology
+- ⬜ Improve Experimental Evaluation
+
+---
+
+## Next Actions
+
+1. Strengthen AI methodology section with clearer model assumptions and design rationale.
+2. Expand experimental evaluation:
+   - Add stronger baselines
+   - Add ablation studies
+   - Add statistical significance reporting
+3. Prepare Paper V2 draft after methodology and evaluation updates.
