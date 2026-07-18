@@ -83,8 +83,8 @@ class DQNAgent:
 
         self.gamma         = 0.99
         self.epsilon       = 1.0
-        self.epsilon_min   = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_min   = 0.05
+        self.epsilon_decay = 0.997
         self.lr            = 0.0005
         self.batch_size    = 64
         self.target_update = 20
@@ -146,7 +146,7 @@ def train():
     action_size = env.action_space.n
 
     agent    = DQNAgent(state_size, action_size)
-    episodes = 500
+    episodes = 6000
     scores   = []
 
     for episode in range(episodes):
