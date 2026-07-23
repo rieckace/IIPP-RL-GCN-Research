@@ -1,0 +1,1 @@
+"""Evacuation environment placeholder."""

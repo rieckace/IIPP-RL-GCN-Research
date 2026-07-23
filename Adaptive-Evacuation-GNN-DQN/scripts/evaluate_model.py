@@ -1,0 +1,1 @@
+"""Evaluate model placeholder script."""

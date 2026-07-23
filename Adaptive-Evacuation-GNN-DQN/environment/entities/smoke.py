@@ -1,0 +1,1 @@
+"""Smoke entity placeholder."""

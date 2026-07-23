@@ -1,0 +1,1 @@
+"""Exit entity placeholder."""

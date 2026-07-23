@@ -1,0 +1,5 @@
+name: adaptive-evacuation-gnn-dqn
+channels:
+  - defaults
+dependencies:
+  - python=3.11
