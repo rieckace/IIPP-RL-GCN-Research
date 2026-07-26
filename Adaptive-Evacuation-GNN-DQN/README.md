@@ -300,7 +300,7 @@ rewards:
 ## 👨‍💻 Author
 
 **Rikesh Yadav**
-Computer Science & Engineering (7th Semester)
+Computer Science & Engineering
 Sri Eshwar College of Engineering, India
 
 **Research Intern** — International Internship Pilot Program (IIPP)
@@ -309,7 +309,7 @@ Sri Eshwar College of Engineering, India
 **Supervisor:** Assistant Professor Dr. Ihsan Ullah
 **Internship Period:** June – August 2026
 
-📧 GitHub: [github.com/Rieck-Ace](https://github.com/Rieck-Ace)
+📧 GitHub: [github.com/Rieck-Ace](https://github.com/rieckace)
 
 ---
 
