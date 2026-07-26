@@ -1,0 +1,52 @@
+# Default configuration for the Adaptive Evacuation Environment
+# All values can be overridden at runtime.
+
+grid:
+  rows: 10
+  cols: 10
+
+map:
+  # Wall positions [row, col] — defines rooms and corridors
+  walls:
+    # Top-left room walls
+    - [1, 1]
+    - [1, 2]
+    - [2, 1]
+    # Central corridor walls
+    - [3, 5]
+    - [4, 5]
+    - [5, 5]
+    # Bottom partition
+    - [6, 3]
+    - [6, 4]
+    - [7, 7]
+    - [7, 8]
+    # Additional structure
+    - [4, 2]
+    - [8, 5]
+
+  # Exit positions — the agent's goal
+  exits:
+    - [0, 9]   # Top-right exit
+    - [9, 0]   # Bottom-left exit
+
+  # Initial fire sources
+  fire_sources:
+    - [5, 2]   # Fire starts in the middle-left area
+
+  # Agent starting position(s)
+  agent_start:
+    - [0, 0]   # Agent starts at top-left corner
+
+dynamics:
+  fire_spread_probability: 0.3   # Per-neighbor per-step probability
+  smoke_radius: 2                # Manhattan distance around fire
+  max_steps: 200                 # Episode truncation limit
+
+rewards:
+  exit_reached: 100.0
+  fire_hit: -50.0
+  smoke_step: -10.0
+  wall_bump: -5.0
+  normal_step: -1.0
+  stay_penalty: -2.0
