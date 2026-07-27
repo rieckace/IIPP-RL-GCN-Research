@@ -1,5 +1,125 @@
+"""
+main.py
+
+Unified entry point for the Adaptive Evacuation GNN-DQN project.
+
+Usage:
+    python main.py --mode train   --config configs/dqn.yaml
+    python main.py --mode evaluate --checkpoint checkpoints/dqn/best_model.pt
+    python main.py --mode demo     --checkpoint checkpoints/dqn/best_model.pt
+"""
+
+import argparse
+import os
+import sys
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, PROJECT_ROOT)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Adaptive Evacuation GNN-DQN — Unified Entry Point"
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["train", "evaluate", "demo"],
+        default="train",
+        help="Execution mode: train, evaluate, or demo.",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=os.path.join(PROJECT_ROOT, "configs", "dqn.yaml"),
+        help="Path to config YAML.",
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default=os.path.join(PROJECT_ROOT, "checkpoints", "dqn", "best_model.pt"),
+        help="Path to model checkpoint (for evaluate/demo modes).",
+    )
+    parser.add_argument("--episodes", type=int, default=None, help="Override episode count.")
+    parser.add_argument("--seed", type=int, default=None, help="Override random seed.")
+    parser.add_argument("--delay", type=float, default=0.3, help="Frame delay for demo mode.")
+    return parser.parse_args()
+
+
 def main() -> None:
-    pass
+    args = parse_args()
+
+    if args.mode == "train":
+        from utils.config_loader import load_config
+        from training.train_dqn import train
+
+        config = load_config(args.config, validate=False)
+        train(config, num_episodes=args.episodes, seed=args.seed)
+
+    elif args.mode == "evaluate":
+        from utils.config_loader import load_config
+        from environment.evacuation_env import EvacuationEnv
+        from models.dqn.trainer import DQNAgent
+        from models.dqn.inference import evaluate_agent
+
+        dqn_config = load_config(args.config, validate=False)
+        env_config_path = dqn_config.get("environment", {}).get("config_path", "configs/default.yaml")
+        if not os.path.isabs(env_config_path):
+            env_config_path = os.path.join(PROJECT_ROOT, env_config_path)
+        env_config = load_config(env_config_path)
+
+        env = EvacuationEnv(env_config)
+        agent = DQNAgent(dqn_config)
+        agent.load_checkpoint(args.checkpoint)
+        agent.epsilon = 0.0
+
+        episodes = args.episodes or 100
+        results = evaluate_agent(env, agent, num_episodes=episodes)
+
+        print(f"\nEvaluation over {episodes} episodes:")
+        print(f"  Avg Reward:    {results['avg_reward']:+.1f}")
+        print(f"  Success Rate:  {results['success_rate']*100:.1f}%")
+        print(f"  Avg Steps:     {results['avg_steps']:.1f}")
+        env.close()
+
+    elif args.mode == "demo":
+        import time
+        from utils.config_loader import load_config
+        from environment.evacuation_env import EvacuationEnv
+        from models.dqn.trainer import DQNAgent
+
+        dqn_config = load_config(args.config, validate=False)
+        env_config_path = dqn_config.get("environment", {}).get("config_path", "configs/default.yaml")
+        if not os.path.isabs(env_config_path):
+            env_config_path = os.path.join(PROJECT_ROOT, env_config_path)
+        env_config = load_config(env_config_path)
+
+        env = EvacuationEnv(env_config, render_mode="human")
+        agent = DQNAgent(dqn_config)
+
+        if os.path.exists(args.checkpoint):
+            agent.load_checkpoint(args.checkpoint)
+            agent.epsilon = 0.0
+            print(f"[OK] Loaded: {args.checkpoint}")
+        else:
+            print(f"[!] No checkpoint found. Using random agent.")
+            agent.epsilon = 1.0
+
+        seed = args.seed or 42
+        obs, _ = env.reset(seed=seed)
+        time.sleep(args.delay)
+
+        total_reward = 0.0
+        while True:
+            action = agent.act(obs, explore=False)
+            obs, reward, terminated, truncated, info = env.step(action)
+            total_reward += reward
+            time.sleep(args.delay)
+            if terminated or truncated:
+                break
+
+        print(f"\nResult: {info['reason']} | Reward: {total_reward:+.1f}")
+        env.close()
 
 
 if __name__ == "__main__":
