@@ -23,9 +23,10 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 
 ---
 
-## 📌 Current Status — Phase 1 Complete ✅
+## 📌 Current Status — Phase 2 Complete ✅
 
 A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
+A complete **Double DQN agent** training pipeline is now implemented, serving as the baseline for future graph-based approaches.
 
 ### What's Working
 
@@ -38,8 +39,10 @@ A fully functional **Gymnasium-compatible evacuation environment** with dynamic 
 | **Multi-Objective Rewards** | 6 event types (exit, fire, smoke, wall, step, stay) | ✅ |
 | **GNN Graph State** | One-hot node features + COO edge index | ✅ |
 | **ANSI Terminal Renderer** | Colourized real-time visualization | ✅ |
-| **YAML Config System** | Fully configurable grid, rewards, dynamics | ✅ |
-| **Unit Test Suite** | 46 tests across 7 test classes | ✅ |
+| **YAML Config System** | Fully configurable grid, rewards, dynamics, agent | ✅ |
+| **Double DQN Agent** | Baseline agent with target network and replay buffer | ✅ |
+| **Training Pipeline** | Full training loop with metrics, plots, and early stopping | ✅ |
+| **Unit Test Suite** | 79 tests across Phase 1 and Phase 2 components | ✅ |
 
 ---
 
