@@ -2,7 +2,7 @@
 config_loader.py
 
 Utility for loading and validating YAML configuration files
-for the evacuation environment.
+for the evacuation environment and training pipelines.
 """
 
 import os
@@ -15,11 +15,14 @@ _REQUIRED_SECTIONS = ["grid", "map", "dynamics", "rewards"]
 _REQUIRED_MAP_KEYS = ["walls", "exits", "fire_sources", "agent_start"]
 
 
-def load_config(path: str) -> Dict[str, Any]:
-    """Load a YAML config file and validate required keys.
+def load_config(path: str, validate: bool = True) -> Dict[str, Any]:
+    """Load a YAML config file and optionally validate required keys.
 
     Args:
-        path: Absolute or relative path to the YAML config file.
+        path:     Absolute or relative path to the YAML config file.
+        validate: If True, validates that environment-specific sections
+                  (grid, map, dynamics, rewards) are present. Set to False
+                  for non-environment configs like dqn.yaml or training.yaml.
 
     Returns:
         Parsed configuration dictionary.
@@ -37,6 +40,22 @@ def load_config(path: str) -> Dict[str, Any]:
     if config is None:
         raise ValueError(f"Config file is empty: {path}")
 
+    if validate:
+        _validate_env_config(config, path)
+
+    return config
+
+
+def _validate_env_config(config: Dict[str, Any], path: str) -> None:
+    """Validate that an environment config has all required sections.
+
+    Args:
+        config: Parsed config dictionary.
+        path:   File path (for error messages).
+
+    Raises:
+        ValueError: If required sections or keys are missing.
+    """
     # Validate top-level sections
     for section in _REQUIRED_SECTIONS:
         if section not in config:
@@ -52,4 +71,3 @@ def load_config(path: str) -> Dict[str, Any]:
                 f"Missing required map key: 'map.{key}' in {path}"
             )
 
-    return config
