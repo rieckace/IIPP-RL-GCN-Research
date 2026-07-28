@@ -28,6 +28,14 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
 A baseline **Double DQN agent** training pipeline is implemented, alongside a brand new **Graph Neural Network (GNN-DQN)** that utilizes PyTorch Geometric to interpret the environment's spatial structure. The GNN natively supports zero-shot transfer to larger grid sizes (e.g. training on 10x10 and evaluating on 15x15).
 
+### Experiment Results: DQN vs GNN
+We successfully trained both agents for 1500 episodes. The DQN converged faster on the fixed 10x10 grid, but the GNN learned a generalized spatial strategy, allowing it to achieve a **100% success rate on an unseen 15x15 grid** via zero-shot transfer (where the DQN instantly crashes).
+
+<p align="center">
+  <img src="results/plots/comparison_success_rate.png" width="48%" />
+  <img src="results/plots/comparison_reward.png" width="48%" />
+</p>
+
 ### What's Working
 
 | Component | Description | Status |

@@ -27,7 +27,7 @@ desktop.ini
 
 # Project-specific: generated outputs
 checkpoints/
-results/
+results/logs/
 *.egg-info/
 
 # Pytest
