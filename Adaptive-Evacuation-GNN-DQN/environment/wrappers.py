@@ -49,3 +49,52 @@ class GraphObservationWrapper(gym.ObservationWrapper):
     def observation(self, obs: Any) -> Dict[str, np.ndarray]:
         """Convert the underlying flat observation to a graph observation."""
         return self.unwrapped.get_graph_observation()
+
+
+class HybridObservationWrapper(gym.ObservationWrapper):
+    """Converts the flat observation into a 9-dim hybrid graph observation.
+    
+    At each step, it runs the A* planner to find the shortest path to the 
+    exit (ignoring fire). It then appends this path as a binary flag to 
+    the node features.
+    """
+
+    def __init__(self, env: gym.Env):
+        super().__init__(env)
+        
+        # Import here to avoid circular dependencies if any
+        from environment.heuristics import AStarPlanner
+        self.planner = AStarPlanner
+        
+        rows = self.unwrapped.rows
+        cols = self.unwrapped.cols
+        num_nodes = rows * cols
+        num_cell_types = 9  # 8 CellTypes + 1 A* Path Flag
+        
+        self.observation_space = gym.spaces.Dict({
+            "node_features": gym.spaces.Box(
+                low=0.0, high=1.0, 
+                shape=(num_nodes, num_cell_types), 
+                dtype=np.float32
+            ),
+            "edge_index": gym.spaces.Box(
+                low=0, high=num_nodes - 1,
+                shape=(2, num_nodes * 4), 
+                dtype=np.int64
+            )
+        })
+
+    def observation(self, obs: Any) -> Dict[str, np.ndarray]:
+        env_state = self.unwrapped.state
+        grid = self.unwrapped.grid
+        
+        # If agent is dead/removed, just use empty path
+        if not env_state.agent_positions:
+            optimal_path = []
+        else:
+            start = env_state.agent_positions[0]
+            exits = env_state.exit_cells
+            optimal_path = self.planner.compute_path(grid, start, exits)
+            
+        return env_state.to_hybrid_graph(grid, optimal_path)
+

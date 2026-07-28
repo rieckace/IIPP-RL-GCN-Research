@@ -24,9 +24,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mode",
         type=str,
-        choices=["train", "evaluate", "demo", "train-gnn", "eval-gnn"],
+        choices=["train", "evaluate", "demo", "train-gnn", "eval-gnn", "train-hybrid"],
         default="train",
-        help="Execution mode: train, evaluate, demo, train-gnn, or eval-gnn.",
+        help="Execution mode: train, evaluate, demo, train-gnn, eval-gnn, or train-hybrid.",
     )
     parser.add_argument(
         "--config",
@@ -68,6 +68,14 @@ def main() -> None:
     elif args.mode == "eval-gnn":
         print("To evaluate transferability, run:")
         print("python training/evaluate_gnn_transfer.py --rows 15 --cols 15")
+
+    elif args.mode == "train-hybrid":
+        from utils.config_loader import load_config
+        from training.train_hybrid import train as train_hybrid
+        config = load_config(args.config, validate=False)
+        print("Starting Hybrid GNN-A* Training...")
+        train_hybrid(config, num_episodes=args.episodes, seed=args.seed)
+        print(f"[OK] Training Hybrid GNN-A* completed.")
 
     elif args.mode == "evaluate":
         from utils.config_loader import load_config

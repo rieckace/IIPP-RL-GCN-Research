@@ -111,6 +111,38 @@ class EnvironmentState:
         }
 
     # ------------------------------------------------------------------
+    # Hybrid Graph conversion (for Phase 4 Heuristic GNN)
+    # ------------------------------------------------------------------
+    def to_hybrid_graph(self, grid: Grid, optimal_path: List[Tuple[int, int]]) -> Dict[str, np.ndarray]:
+        """Convert grid into a graph with 9 node features (8 one-hot + 1 heuristic flag).
+        
+        Args:
+            grid: The current Grid state.
+            optimal_path: List of (row, col) coordinates representing the A* path.
+        """
+        # Get standard 8-dim features
+        base_graph = self.to_graph(grid)
+        base_features = base_graph["node_features"]
+        
+        rows, cols = grid.rows, grid.cols
+        num_nodes = rows * cols
+        
+        # Create a new feature column for the optimal path flag
+        path_feature = np.zeros((num_nodes, 1), dtype=np.float32)
+        
+        for r, c in optimal_path:
+            node_id = r * cols + c
+            path_feature[node_id, 0] = 1.0
+            
+        # Concatenate base features (N x 8) with path feature (N x 1) -> (N x 9)
+        hybrid_features = np.concatenate([base_features, path_feature], axis=1)
+        
+        return {
+            "node_features": hybrid_features,
+            "edge_index": base_graph["edge_index"],
+        }
+
+    # ------------------------------------------------------------------
     # Sync state → grid
     # ------------------------------------------------------------------
     def sync_to_grid(self, grid: Grid) -> None:
