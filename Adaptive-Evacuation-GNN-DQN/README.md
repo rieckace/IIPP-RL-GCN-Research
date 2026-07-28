@@ -23,13 +23,15 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 
 ---
 
-## 📌 Current Status — Phase 3 Complete ✅
+## 📌 Current Status — Phase 4 Complete ✅
 
 A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
 A baseline **Double DQN agent** training pipeline is implemented, alongside a brand new **Graph Neural Network (GNN-DQN)** that utilizes PyTorch Geometric to interpret the environment's spatial structure. The GNN natively supports zero-shot transfer to larger grid sizes (e.g. training on 10x10 and evaluating on 15x15).
+Finally, a **Hybrid Heuristic System** integrates A* pathfinding dynamically into the GNN observations, boosting learning speed by 26%.
 
-### Experiment Results: DQN vs GNN
-We successfully trained both agents for 1500 episodes. The DQN converged faster on the fixed 10x10 grid, but the GNN learned a generalized spatial strategy, allowing it to achieve a **100% success rate on an unseen 15x15 grid** via zero-shot transfer (where the DQN instantly crashes).
+### Experiment Results: DQN vs GNN vs Hybrid
+We successfully trained all agents. The DQN converged in 443 episodes on the fixed 10x10 grid, but crashes on larger grids. The standard GNN learned a generalized spatial strategy and achieved 100% transfer success but took 938 episodes to learn from scratch. 
+The **Hybrid GNN-A*** agent combined the best of both worlds: it used heuristics to know *where* to go, dropping training time to just 691 episodes while retaining perfect generalization.
 
 <p align="center">
   <img src="results/plots/comparison_success_rate.png" width="48%" />
@@ -39,18 +41,14 @@ We successfully trained both agents for 1500 episodes. The DQN converged faster 
 ### What's Working
 
 | Component | Description | Status |
-|---|---|---|
-| **Gymnasium Environment** | Standard `reset()` / `step()` / `render()` API | ✅ |
-| **10×10 Building Grid** | Configurable walls, exits, corridors | ✅ |
-| **Dynamic Fire Spread** | Probabilistic fire propagation to adjacent cells | ✅ |
-| **Smoke Propagation** | Manhattan-radius smoke around fire sources | ✅ |
-| **Multi-Objective Rewards** | 6 event types (exit, fire, smoke, wall, step, stay) | ✅ |
-| **GNN Graph State** | One-hot node features + COO edge index | ✅ |
+| :--- | :--- | :---: |
+| **Grid Generation** | Procedural mazes, static layouts, A* path validation | ✅ |
+| **Fire Dynamics** | Spreading cellular automata for fire and smoke | ✅ |
 | **ANSI Terminal Renderer** | Colourized real-time visualization | ✅ |
 | **YAML Config System** | Fully configurable grid, rewards, dynamics, agent | ✅ |
 | **Double DQN Agent** | Baseline agent with target network and replay buffer | ✅ |
 | **Graph Neural Network (GNN)** | PyG `GCNConv` message passing architecture | ✅ |
-| **Graph Replay Buffer** | Batched PyG `Data` storage and sampling | ✅ |
+| **Hybrid Heuristic System** | Dynamic A* shortest-path injected into GNN features | ✅ |
 | **Variable-Size Transfer** | Zero-shot evaluation on larger unseen grids (15x15) | ✅ |
 | **Training Pipeline** | Full training loops for DQN and GNN with early stopping | ✅ |
 | **Unit Test Suite** | 82 tests covering all environment, DQN, and GNN components | ✅ |
