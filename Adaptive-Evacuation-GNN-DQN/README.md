@@ -23,10 +23,10 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 
 ---
 
-## 📌 Current Status — Phase 2 Complete ✅
+## 📌 Current Status — Phase 3 Complete ✅
 
 A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
-A complete **Double DQN agent** training pipeline is now implemented, serving as the baseline for future graph-based approaches.
+A baseline **Double DQN agent** training pipeline is implemented, alongside a brand new **Graph Neural Network (GNN-DQN)** that utilizes PyTorch Geometric to interpret the environment's spatial structure. The GNN natively supports zero-shot transfer to larger grid sizes (e.g. training on 10x10 and evaluating on 15x15).
 
 ### What's Working
 
@@ -41,8 +41,11 @@ A complete **Double DQN agent** training pipeline is now implemented, serving as
 | **ANSI Terminal Renderer** | Colourized real-time visualization | ✅ |
 | **YAML Config System** | Fully configurable grid, rewards, dynamics, agent | ✅ |
 | **Double DQN Agent** | Baseline agent with target network and replay buffer | ✅ |
-| **Training Pipeline** | Full training loop with metrics, plots, and early stopping | ✅ |
-| **Unit Test Suite** | 79 tests across Phase 1 and Phase 2 components | ✅ |
+| **Graph Neural Network (GNN)** | PyG `GCNConv` message passing architecture | ✅ |
+| **Graph Replay Buffer** | Batched PyG `Data` storage and sampling | ✅ |
+| **Variable-Size Transfer** | Zero-shot evaluation on larger unseen grids (15x15) | ✅ |
+| **Training Pipeline** | Full training loops for DQN and GNN with early stopping | ✅ |
+| **Unit Test Suite** | 82 tests covering all environment, DQN, and GNN components | ✅ |
 
 ---
 
