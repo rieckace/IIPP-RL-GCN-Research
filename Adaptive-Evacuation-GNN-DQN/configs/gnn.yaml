@@ -1,1 +1,35 @@
-# GNN configuration placeholder
+# GNN-DQN Training Configuration for Adaptive Evacuation Environment
+
+environment:
+  config_path: "configs/default.yaml"
+  grid_rows: 10
+  grid_cols: 10
+
+agent:
+  gamma: 0.99                    # Discount factor
+  epsilon_start: 1.0             # Start with full random exploration
+  epsilon_decay: 0.997           # Slow decay
+  epsilon_min: 0.01              # Always keep 1% exploration
+  learning_rate: 0.001           # Adam learning rate
+  batch_size: 64                 # Mini-batch size for PyG Batching
+  replay_buffer_size: 50000      # Large buffer for diverse experience
+  target_update_freq: 10         # Hard-copy Q->target every N episodes
+
+network:
+  gcn_hidden_dims: [64, 64, 64]  # 3 GCN layers for message passing
+  mlp_hidden_dims: [128, 64]     # 2 MLP layers for Q-value projection
+
+training:
+  episodes: 1500                 # Total training episodes
+  max_steps_per_episode: 200     # Must match environment max_steps
+  log_interval: 10               # Print metrics every N episodes
+  checkpoint_interval: 100       # Save checkpoint every N episodes
+  early_stop_success_rate: 0.90  # Stop early if success rate exceeds this
+  early_stop_window: 100         # Window for computing success rate
+  seed: 42                       # Random seed for reproducibility
+
+paths:
+  checkpoint_dir: "checkpoints/gnn"
+  results_dir: "results"
+  plots_dir: "results/plots"
+  logs_dir: "results/logs"

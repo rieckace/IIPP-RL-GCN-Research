@@ -3,3 +3,5 @@ numpy
 matplotlib
 gymnasium
 pyyaml
+torch_geometric
+networkx
