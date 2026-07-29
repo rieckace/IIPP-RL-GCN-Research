@@ -4,7 +4,7 @@ constants.py
 Central definitions for cell types, actions, direction deltas,
 and reward configuration used throughout the evacuation environment.
 """
-
+ 
 from enum import IntEnum
 from dataclasses import dataclass, field
 
@@ -70,3 +70,4 @@ class RewardConfig:
     wall_bump: float = -5.0
     normal_step: float = -1.0
     stay_penalty: float = -2.0
+    team_bonus: float = 10.0

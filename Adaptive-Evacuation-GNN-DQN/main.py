@@ -24,9 +24,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mode",
         type=str,
-        choices=["train", "evaluate", "demo", "train-gnn", "eval-gnn", "train-hybrid"],
+        choices=["train", "evaluate", "demo", "train-gnn", "eval-gnn", "train-hybrid", "train-marl"],
         default="train",
-        help="Execution mode: train, evaluate, demo, train-gnn, eval-gnn, or train-hybrid.",
+        help="Execution mode.",
     )
     parser.add_argument(
         "--config",
@@ -76,6 +76,14 @@ def main() -> None:
         print("Starting Hybrid GNN-A* Training...")
         train_hybrid(config, num_episodes=args.episodes, seed=args.seed)
         print(f"[OK] Training Hybrid GNN-A* completed.")
+
+    elif args.mode == "train-marl":
+        from utils.config_loader import load_config
+        from training.train_marl import train as train_marl
+        config = load_config(args.config, validate=False)
+        print("Starting Multi-Agent GNN Training...")
+        train_marl(config, num_episodes=args.episodes, seed=args.seed)
+        print(f"[OK] Training MARL completed.")
 
     elif args.mode == "evaluate":
         from utils.config_loader import load_config

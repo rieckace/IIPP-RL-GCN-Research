@@ -77,6 +77,18 @@
 - Implemented Phase 4 (Hybrid GNN-A*).
 - Achieved a 26% faster convergence rate (691 episodes) compared to the pure GNN, officially validating the hybrid research hypothesis.
 
+## Meeting 8
+**Agenda**: Multi-Agent Reinforcement Learning (MARL) Integration
+**Discussion Points**
+- Discussed scaling the environment from a single evacuee to a multi-agent scenario to better simulate real-world crowds.
+- The Professor advised on the architectural challenges: the previous GNN used Global Mean Pooling, which would give all agents the exact same actions.
+- Designed a solution: Node-Specific Feature Extractors, allowing a single GNN to process the entire building while agents extract their unique local features based on their coordinates.
+- Implemented collision handling and cooperative rewards (team bonuses).
+- Reviewed the MARL training results (0% success rate). The Professor noted that this is a classic finding in multi-agent research; without explicit inter-agent communication, deadlock in bottlenecks is inevitable.
+**Outcome**
+- Successfully built the MARL subsystem (Phase 5).
+- Established the groundwork for future research into Communication Networks (CommNets).
+
 ---
 
 ## Overall Progress Summary
@@ -90,3 +102,4 @@
 | **Meeting 5** | Environment Design (Phase 1) | Built Gymnasium-compatible Cellular Automata fire grid. |
 | **Meeting 6** | GNN Transition (Phases 2 & 3) | Replaced DQN with PyG GNN for zero-shot spatial transferability. |
 | **Meeting 7** | Hybrid Integration (Phase 4) | Integrated A* heuristic with GNN, improving training efficiency by 26%. |
+| **Meeting 8** | Multi-Agent Systems (Phase 5) | Built MARL framework and identified bottleneck/coordination challenges. |

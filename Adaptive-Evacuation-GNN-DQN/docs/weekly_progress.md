@@ -27,3 +27,7 @@
 ## Week 7
 - **Focus**: Phase 4 - Hybrid Heuristic System & Experiments
 - **Tasks Completed**: Conducted full 1500-episode experiments comparing DQN vs GNN. Implemented the `AStarPlanner` to feed shortest-path hints into the GNN's node features. The Hybrid GNN-A* successfully cut training time by 26%. All code and documentation finalized.
+
+## Week 8
+- **Focus**: Phase 5 - Multi-Agent Systems (MARL)
+- **Tasks Completed**: Overhauled the environment to support multiple simultaneous agents and collision handling. Upgraded the GNN to extract node-specific embeddings (bypassing global pooling). Ran a 3-agent experiment which yielded a 0% success rate, successfully demonstrating that explicit communication networks are required to solve multi-agent bottleneck deadlocks.

@@ -20,9 +20,10 @@
 - **Features**: Dynamically calculates the shortest path (A*) to the exit at every step, ignoring fire. Appends this optimal path to the GNN's node features as a 9th dimension.
 - **Status**: Completed. Cut training time by 26% (Converged in 691 episodes) while retaining perfect size generalization.
 
-## Phase 5: Multi-Agent Systems (Proposed) ⏳
+## Phase 5: Multi-Agent Systems (MARL) ✅
 - **Goal**: Introduce multiple agents evacuating simultaneously.
-- **Challenges**: Agents must coordinate to avoid bottlenecks in corridors while dynamically routing around spreading fire.
+- **Features**: Subclassed `MARLEvacuationEnv` with collision avoidance logic and team-based cooperative rewards. Replaced the GNN Global Mean Pooling with Node-Specific Embeddings, allowing multiple agents to act independently based on their exact physical coordinate.
+- **Status**: Completed. Training yielded a 0% success rate, proving that implicit spatial awareness is insufficient for multi-agent coordination in bottlenecks, highlighting the necessity for explicit communication networks.
 
 ## Phase 6: Front-End Visualization (Proposed) ⏳
 - **Goal**: Build a graphical user interface (GUI) or web application to visualize the evacuation process, moving away from terminal ANSI characters.

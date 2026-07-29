@@ -98,3 +98,35 @@ class HybridObservationWrapper(gym.ObservationWrapper):
             
         return env_state.to_hybrid_graph(grid, optimal_path)
 
+
+class MARLGraphObservationWrapper(gym.ObservationWrapper):
+    """Converts the flat observation into a graph dict for MARL agents.
+    
+    Identical to GraphObservationWrapper, but works safely with MARLEvacuationEnv.
+    """
+    def __init__(self, env: gym.Env):
+        super().__init__(env)
+        
+        rows = getattr(self.unwrapped, 'rows', 10)
+        cols = getattr(self.unwrapped, 'cols', 10)
+        num_nodes = rows * cols
+        num_cell_types = 8
+        
+        self.observation_space = gym.spaces.Dict({
+            "node_features": gym.spaces.Box(
+                low=0.0, high=1.0, 
+                shape=(num_nodes, num_cell_types), 
+                dtype=np.float32
+            ),
+            "edge_index": gym.spaces.Box(
+                low=0, high=num_nodes - 1,
+                shape=(2, num_nodes * 4), 
+                dtype=np.int64
+            )
+        })
+
+    def observation(self, obs: Any) -> Dict[str, np.ndarray]:
+        # If the unwrapped env doesn't have state/grid, fallback
+        if not hasattr(self.unwrapped, 'state'):
+            return obs
+        return self.unwrapped.state.to_graph(self.unwrapped.grid)

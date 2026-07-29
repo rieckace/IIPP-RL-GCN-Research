@@ -11,3 +11,7 @@
 3. **Dynamic Hazard Avoidance**
    *Can an RL agent learn to preemptively route around cellular automata-based fire spreading without knowing the exact probabilistic spread formula?*
    - **Answered**: Yes. The message-passing nature of the GNN allowed the agent to "feel" the fire approaching from adjacent nodes and successfully route around it to reach the exit safely.
+
+4. **Multi-Agent Coordination (MARL)**
+   *Is implicit spatial awareness sufficient for multiple agents to coordinate and avoid deadlocks in narrow corridors?*
+   - **Answered**: No. The Phase 5 Multi-Agent experiment yielded a 0% success rate. Even with cooperative "Team Bonus" rewards and node-specific embeddings, agents physically blocked each other. This proves that explicit inter-agent communication architectures are required for bottleneck resolution.

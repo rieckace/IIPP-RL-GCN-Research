@@ -32,3 +32,20 @@
 - **Hybrid GNN-A***: 691 Episodes to converge.
 
 **Conclusion**: The Hybrid approach reduced training time by **26.3%**. The agent leverages the A* heuristic to know *where* the exit is from Episode 1, allowing the RL network to dedicate all its capacity to learning *how to navigate around the fire*.
+
+---
+
+## Experiment 3: Multi-Agent Coordination (MARL)
+**Date**: July 28, 2026
+**Hypothesis**: By sharing a single GNN and extracting Node-Specific Embeddings for each agent's coordinate, multiple agents can navigate the grid simultaneously and avoid bottlenecks using a shared cooperative "Team Bonus" reward.
+**Methodology**:
+- Upgraded the GNN to extract node features at exact agent coordinates rather than using Global Mean Pooling.
+- Environment updated with collision logic (agents cannot occupy the same cell).
+- Team Bonus (+20) awarded to all active agents when one agent successfully escapes.
+- Trained 3 agents simultaneously on a 10x10 grid for 1500 episodes.
+
+**Results**:
+- **Success Rate**: 0.0%
+- Agents successfully learned basic movement but repeatedly fell into deadlocks (blocking each other in corridors).
+
+**Conclusion**: While Node-Specific Extractors allow multiple agents to run through a shared GNN, implicit spatial awareness is insufficient for complex coordination. Without explicit communication channels (e.g., passing messages directly between agents), they cannot resolve bottlenecks effectively.

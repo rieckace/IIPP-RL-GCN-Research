@@ -23,3 +23,9 @@ Used in the Phase 4 Hybrid model.
 ## 4. Cellular Automata
 Used in Phase 1 Environment generation.
 - Spreads fire probabilistically from burning cells to adjacent empty cells at each time step.
+
+## 5. MARL Node-Specific Extractors
+Used in Phase 5 Multi-Agent Systems.
+- A single GNN processes the entire grid graph to establish global spatial awareness.
+- Instead of pooling the graph into one vector, the network extracts the exact hidden tensor at the specific node index corresponding to an agent's `(row, col)` coordinate.
+- Allows multiple agents to query a shared spatial brain while receiving highly localized, unique action policies.

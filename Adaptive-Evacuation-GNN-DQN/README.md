@@ -23,15 +23,15 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 
 ---
 
-## 📌 Current Status — Phase 4 Complete ✅
+## 📌 Current Status — Phase 5 Complete ✅
 
 A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
 A baseline **Double DQN agent** training pipeline is implemented, alongside a brand new **Graph Neural Network (GNN-DQN)** that utilizes PyTorch Geometric to interpret the environment's spatial structure. The GNN natively supports zero-shot transfer to larger grid sizes (e.g. training on 10x10 and evaluating on 15x15).
-Finally, a **Hybrid Heuristic System** integrates A* pathfinding dynamically into the GNN observations, boosting learning speed by 26%.
+A **Hybrid Heuristic System** integrates A* pathfinding dynamically into the GNN observations, boosting learning speed by 26%.
+Finally, a **Multi-Agent Reinforcement Learning (MARL)** subsystem has been integrated, allowing multiple agents to navigate simultaneously using Node-Specific Embedding Extractors, highlighting complex bottleneck challenges.
 
-### Experiment Results: DQN vs GNN vs Hybrid
-We successfully trained all agents. The DQN converged in 443 episodes on the fixed 10x10 grid, but crashes on larger grids. The standard GNN learned a generalized spatial strategy and achieved 100% transfer success but took 938 episodes to learn from scratch. 
-The **Hybrid GNN-A*** agent combined the best of both worlds: it used heuristics to know *where* to go, dropping training time to just 691 episodes while retaining perfect generalization.
+### Experiment Results: MARL Bottlenecks
+While single-agent models (DQN, GNN, Hybrid) successfully learn to evade fire and reach exits, the **Multi-Agent GNN** experiment (3 agents) resulted in a 0% success rate. The agents lack explicit inter-agent communication, causing them to physically block each other in narrow corridors (deadlocks) until the fire consumes them. This finding paves the way for future research into Communication Networks (CommNets).
 
 <p align="center">
   <img src="results/plots/comparison_success_rate.png" width="48%" />
@@ -49,8 +49,10 @@ The **Hybrid GNN-A*** agent combined the best of both worlds: it used heuristics
 | **Double DQN Agent** | Baseline agent with target network and replay buffer | ✅ |
 | **Graph Neural Network (GNN)** | PyG `GCNConv` message passing architecture | ✅ |
 | **Hybrid Heuristic System** | Dynamic A* shortest-path injected into GNN features | ✅ |
+| **MARL Environment** | Multi-agent Gymnasium subclass with collision logic | ✅ |
+| **Node-Specific GNN Extractors**| Allows multiple agents to share 1 GNN via unique spatial IDs | ✅ |
 | **Variable-Size Transfer** | Zero-shot evaluation on larger unseen grids (15x15) | ✅ |
-| **Training Pipeline** | Full training loops for DQN and GNN with early stopping | ✅ |
+| **Training Pipeline** | Full training loops for DQN, GNN, and MARL with early stopping | ✅ |
 | **Unit Test Suite** | 82 tests covering all environment, DQN, and GNN components | ✅ |
 
 ---
