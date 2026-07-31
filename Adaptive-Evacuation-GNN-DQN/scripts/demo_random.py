@@ -47,6 +47,13 @@ def parse_args() -> argparse.Namespace:
         default=42,
         help="Random seed for reproducibility.",
     )
+    parser.add_argument(
+        "--no-pause",
+        dest="pause_on_terminal",
+        action="store_false",
+        help="Exit immediately after a terminal state instead of waiting.",
+    )
+    parser.set_defaults(pause_on_terminal=True)
     return parser.parse_args()
 
 
@@ -89,7 +96,16 @@ def main() -> None:
     print(f"  Outcome:       {info['reason']}")
     print(f"  Fire cells:    {info['fire_count']}")
     print(f"  Smoke cells:   {info['smoke_count']}")
+    if info.get("reason") == "reached_exit":
+        print("  Status:        SUCCESS - agent reached the exit")
+    elif info.get("reason") == "hit_fire":
+        print("  Status:        FAILURE - agent was caught by fire")
+    elif info.get("reason") == "max_steps_exceeded":
+        print("  Status:        FAILURE - max steps exceeded")
     print("=" * 50)
+
+    if args.pause_on_terminal:
+        input("Press Enter to close the demo and keep the final frame visible...")
 
     env.close()
 

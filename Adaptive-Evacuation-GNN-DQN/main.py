@@ -43,6 +43,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--episodes", type=int, default=None, help="Override episode count.")
     parser.add_argument("--seed", type=int, default=None, help="Override random seed.")
     parser.add_argument("--delay", type=float, default=0.3, help="Frame delay for demo mode.")
+    parser.add_argument(
+        "--no-pause",
+        dest="pause_on_terminal",
+        action="store_false",
+        help="Exit immediately after a terminal state instead of waiting.",
+    )
+    parser.set_defaults(pause_on_terminal=True)
     return parser.parse_args()
 
 
@@ -130,6 +137,8 @@ def main() -> None:
             agent.load_checkpoint(args.checkpoint)
             agent.epsilon = 0.0
             print(f"[OK] Loaded: {args.checkpoint}")
+            print("[!] Note: this checkpoint was trained before the current fire-spread tuning.")
+            print("    If success is unstable, retrain on the updated environment config.")
         else:
             print(f"[!] No checkpoint found. Using random agent.")
             agent.epsilon = 1.0
@@ -148,6 +157,15 @@ def main() -> None:
                 break
 
         print(f"\nResult: {info['reason']} | Reward: {total_reward:+.1f}")
+        if info.get("reason") == "reached_exit":
+            print("Status: SUCCESS - agent reached the exit")
+        elif info.get("reason") == "hit_fire":
+            print("Status: FAILURE - agent was caught by fire")
+        elif info.get("reason") == "max_steps_exceeded":
+            print("Status: FAILURE - max steps exceeded")
+
+        if args.pause_on_terminal:
+            input("Press Enter to close the demo and keep the final frame visible...")
         env.close()
 
 

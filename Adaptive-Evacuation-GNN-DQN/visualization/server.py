@@ -117,8 +117,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 else:
                     logger.warning(f"No checkpoint found at {ckpt}. Using random agent.")
                     agent.epsilon = 1.0
-                    
-            # Run Episode Loop
+
+            # Hold the terminal state until an explicit reset is requested.
+            # This prevents the simulation from immediately restarting after
+            # a success/failure frame, which makes the final outcome visible.
             obs, info = env.reset()
             active_agents = info.get("active_agents", [True]) if is_marl else [info.get("reason", "") != "reached_exit" and info.get("reason", "") != "hit_fire"]
             
@@ -153,6 +155,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     
                 await send_state(websocket, base_env, info, active_agents, is_marl)
                 await asyncio.sleep(0.3) # Faster simulation speed
+
+            # Keep the final state on screen until the client explicitly
+            # requests a reset from the configure endpoint.
+            if terminated or truncated:
+                if is_marl:
+                    logger.info("Episode ended; waiting for explicit reset request.")
+                else:
+                    logger.info(f"Episode ended with reason={info.get('reason')}; waiting for explicit reset request.")
+                while not sim_state.reset_requested:
+                    await asyncio.sleep(0.2)
                 
     except WebSocketDisconnect:
         logger.info("Client disconnected.")
@@ -165,7 +177,7 @@ async def send_state(websocket: WebSocket, base_env, info: dict, active_agents: 
         row_data = []
         for c in range(base_env.cols):
             cell = base_env.grid.get_cell(r, c)
-            row_data.append(cell.value)
+            row_data.append(int(cell))
         grid_data.append(row_data)
         
     if is_marl:
@@ -180,7 +192,8 @@ async def send_state(websocket: WebSocket, base_env, info: dict, active_agents: 
         "grid": grid_data,
         "agents": agents,
         "step": info.get("step", 0),
-        "total_reward": info.get("total_reward", 0.0)
+        "total_reward": info.get("total_reward", 0.0),
+        "reason": info.get("reason", ""),
     }
     
     await websocket.send_text(json.dumps(payload))

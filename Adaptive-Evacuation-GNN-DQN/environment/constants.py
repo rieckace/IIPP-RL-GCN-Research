@@ -70,4 +70,5 @@ class RewardConfig:
     wall_bump: float = -5.0
     normal_step: float = -1.0
     stay_penalty: float = -2.0
+    exit_progress_scale: float = 0.0
     team_bonus: float = 10.0

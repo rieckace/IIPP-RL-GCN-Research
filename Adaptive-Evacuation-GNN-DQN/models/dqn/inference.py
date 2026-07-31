@@ -8,6 +8,8 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from evaluation.statistics import success_rate_confidence_interval
+
 
 def run_episode(
     env: Any,
@@ -87,11 +89,17 @@ def evaluate_agent(
         reason = result["reason"]
         outcomes[reason] = outcomes.get(reason, 0) + 1
 
+    success_rate = successes / num_episodes if num_episodes > 0 else 0.0
+    ci_low, ci_high = success_rate_confidence_interval(successes, num_episodes)
+
     return {
         "avg_reward": np.mean(all_rewards),
         "std_reward": np.std(all_rewards),
         "avg_steps": np.mean(all_steps),
-        "success_rate": successes / num_episodes,
+        "success_rate": success_rate,
+        "success_count": successes,
+        "failure_count": num_episodes - successes,
+        "success_rate_ci95": (ci_low, ci_high),
         "num_episodes": num_episodes,
         "outcomes": outcomes,
         "all_rewards": all_rewards,

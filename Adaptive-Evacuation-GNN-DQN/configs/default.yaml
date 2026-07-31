@@ -39,14 +39,15 @@ map:
     - [0, 0]   # Agent starts at top-left corner
 
 dynamics:
-  fire_spread_probability: 0.3   # Per-neighbor per-step probability
-  smoke_radius: 2                # Manhattan distance around fire
+  fire_spread_probability: 0.01   # Per-neighbor per-step probability
+  smoke_radius: 1               # Manhattan distance around fire
   max_steps: 200                 # Episode truncation limit
 
 rewards:
-  exit_reached: 100.0
-  fire_hit: -50.0
-  smoke_step: -10.0
-  wall_bump: -5.0
-  normal_step: -1.0
-  stay_penalty: -2.0
+  exit_reached: 150.0
+  fire_hit: -100.0
+  smoke_step: -5.0
+  wall_bump: -2.0
+  normal_step: -0.2
+  stay_penalty: -1.0
+  exit_progress_scale: 1.0

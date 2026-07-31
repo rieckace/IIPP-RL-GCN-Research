@@ -5,8 +5,18 @@ Multi-objective reward function for the evacuation environment.
 All reward magnitudes are controlled by a RewardConfig dataclass.
 """
 
+from environment.heuristics import AStarPlanner
 from environment.constants import CellType, RewardConfig
 from environment.grid import Grid
+
+
+def _get_exit_positions(grid: Grid) -> list[tuple[int, int]]:
+    exits: list[tuple[int, int]] = []
+    for row in range(grid.rows):
+        for col in range(grid.cols):
+            if grid.get_cell(row, col) == CellType.EXIT:
+                exits.append((row, col))
+    return exits
 
 
 def compute_reward(
@@ -43,6 +53,8 @@ def compute_reward(
     else:
         cell = grid.get_cell(new_pos[0], new_pos[1])
 
+    exits = _get_exit_positions(grid)
+
     # --- Terminal: agent reached an exit ---
     if cell == CellType.EXIT:
         return reward_cfg.exit_reached, True, "reached_exit"
@@ -64,4 +76,16 @@ def compute_reward(
         return reward_cfg.stay_penalty, False, "stayed"
 
     # --- Non-terminal: normal valid step ---
-    return reward_cfg.normal_step, False, "normal_step"
+    reward = reward_cfg.normal_step
+
+    # --- Dense shaping: reward moving closer to the nearest exit ---
+    if exits and reward_cfg.exit_progress_scale != 0.0 and moved and not stayed:
+        old_distance = min(
+            AStarPlanner.manhattan_distance(old_pos, exit_pos) for exit_pos in exits
+        )
+        new_distance = min(
+            AStarPlanner.manhattan_distance(new_pos, exit_pos) for exit_pos in exits
+        )
+        reward += reward_cfg.exit_progress_scale * (old_distance - new_distance)
+
+    return reward, False, "normal_step"

@@ -35,6 +35,13 @@ def parse_args() -> argparse.Namespace:
                         help="Seconds between rendered frames.")
     parser.add_argument("--seed", type=int, default=42,
                         help="Environment seed.")
+    parser.add_argument(
+        "--no-pause",
+        dest="pause_on_terminal",
+        action="store_false",
+        help="Exit immediately after a terminal state instead of waiting.",
+    )
+    parser.set_defaults(pause_on_terminal=True)
     return parser.parse_args()
 
 
@@ -56,6 +63,8 @@ def main() -> None:
         agent.load_checkpoint(args.checkpoint)
         agent.epsilon = 0.0  # Pure greedy
         print(f"[OK] Loaded trained model: {args.checkpoint}")
+        print("[!] Note: this checkpoint was trained before the current fire-spread tuning.")
+        print("    If success is unstable, retrain on the updated environment config.")
     else:
         print(f"[!] Checkpoint not found: {args.checkpoint}")
         print("   Running with untrained agent (random actions).")
@@ -88,7 +97,16 @@ def main() -> None:
     print(f"  Outcome:       {info['reason']}")
     print(f"  Fire cells:    {info['fire_count']}")
     print(f"  Smoke cells:   {info['smoke_count']}")
+    if info.get("reason") == "reached_exit":
+        print("  Status:        SUCCESS - agent reached the exit")
+    elif info.get("reason") == "hit_fire":
+        print("  Status:        FAILURE - agent was caught by fire")
+    elif info.get("reason") == "max_steps_exceeded":
+        print("  Status:        FAILURE - max steps exceeded")
     print("=" * 50)
+
+    if args.pause_on_terminal:
+        input("Press Enter to close the demo and keep the final frame visible...")
 
     env.close()
 

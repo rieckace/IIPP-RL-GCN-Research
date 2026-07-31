@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useWebSocket } from './hooks/useWebSocket';
 import { GridRenderer } from './components/GridRenderer';
 
@@ -18,6 +18,29 @@ export function App() {
       console.error("Failed to reconfigure server", e);
     }
   };
+
+  const handleReset = async () => {
+    try {
+      await fetch('http://localhost:8000/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: modelType, grid_size: gridSize })
+      });
+    } catch (e) {
+      console.error("Failed to reset simulation", e);
+    }
+  };
+
+  const outcome = gameState?.reason;
+  const outcomeLabel = outcome === 'reached_exit'
+    ? 'Success - agent reached the exit'
+    : outcome === 'hit_fire'
+      ? 'Failure - agent was caught by fire'
+      : outcome === 'max_steps_exceeded'
+        ? 'Failure - max steps exceeded'
+        : outcome === 'reset'
+          ? 'Ready'
+          : 'Running';
 
   return (
     <div className="app-container">
@@ -58,6 +81,20 @@ export function App() {
           <button className="btn-primary" onClick={handleApply}>
             Apply & Restart
           </button>
+
+          <button
+            className="btn-secondary"
+            onClick={handleReset}
+            disabled={!connected}
+          >
+            Reset Simulation
+          </button>
+
+          {gameState && (
+            <div className={`status-banner ${outcome === 'reached_exit' ? 'status-success' : outcome === 'hit_fire' || outcome === 'max_steps_exceeded' ? 'status-failure' : 'status-neutral'}`}>
+              {outcomeLabel}
+            </div>
+          )}
           
           {gameState && (
             <div className="stats-panel-mini">

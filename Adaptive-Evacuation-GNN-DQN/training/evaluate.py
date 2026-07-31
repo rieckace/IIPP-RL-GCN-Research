@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import sys
 
@@ -20,6 +21,7 @@ from utils.config_loader import load_config
 from environment.evacuation_env import EvacuationEnv
 from models.dqn.trainer import DQNAgent
 from models.dqn.inference import evaluate_agent
+from evaluation.statistics import summarize_outcomes
 
 
 def parse_args() -> argparse.Namespace:
@@ -64,13 +66,38 @@ def main() -> None:
     print(f"  Episodes:       {results['num_episodes']}")
     print(f"  Avg Reward:     {results['avg_reward']:+.1f} ± {results['std_reward']:.1f}")
     print(f"  Avg Steps:      {results['avg_steps']:.1f}")
+    ci_low, ci_high = results.get("success_rate_ci95", (0.0, 0.0))
     print(f"  Success Rate:   {results['success_rate']*100:.1f}%")
+    print(f"  95% CI:         [{ci_low*100:.1f}%, {ci_high*100:.1f}%]")
+    print(f"  Success Count:   {results.get('success_count', 0)}")
+    print(f"  Failure Count:   {results.get('failure_count', 0)}")
     print()
     print("  Outcome Breakdown:")
+    outcome_percentages = summarize_outcomes(results["outcomes"], results["num_episodes"])
     for reason, count in sorted(results["outcomes"].items(), key=lambda x: -x[1]):
-        pct = count / results["num_episodes"] * 100
+        pct = outcome_percentages.get(reason, 0.0) * 100
         print(f"    {reason:<25s}  {count:>4d}  ({pct:5.1f}%)")
     print("=" * 55)
+
+    summary_path = os.path.join(PROJECT_ROOT, "results", "logs", "dqn_evaluation_summary.json")
+    os.makedirs(os.path.dirname(summary_path), exist_ok=True)
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "episodes": results["num_episodes"],
+                "avg_reward": float(results["avg_reward"]),
+                "std_reward": float(results["std_reward"]),
+                "avg_steps": float(results["avg_steps"]),
+                "success_rate": float(results["success_rate"]),
+                "success_rate_ci95": [float(ci_low), float(ci_high)],
+                "success_count": int(results.get("success_count", 0)),
+                "failure_count": int(results.get("failure_count", 0)),
+                "outcomes": results["outcomes"],
+            },
+            f,
+            indent=2,
+        )
+    print(f"\nSaved evaluation summary to: {summary_path}")
 
     env.close()
 

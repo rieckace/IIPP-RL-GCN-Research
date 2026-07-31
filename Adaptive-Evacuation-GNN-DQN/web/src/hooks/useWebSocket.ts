@@ -13,6 +13,7 @@ export type GameState = {
   agents: Agent[];
   step: number;
   total_reward: number;
+  reason?: string;
 };
 
 export function useWebSocket(url: string) {

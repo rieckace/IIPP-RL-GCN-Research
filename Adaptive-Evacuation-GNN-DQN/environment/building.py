@@ -22,8 +22,8 @@ class Building:
 
     def __init__(
         self,
-        fire_spread_probability: float = 0.3,
-        smoke_radius: int = 2,
+        fire_spread_probability: float = 0.01,
+        smoke_radius: int = 1,
     ) -> None:
         """
         Args:
