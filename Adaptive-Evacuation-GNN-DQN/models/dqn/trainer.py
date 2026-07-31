@@ -13,7 +13,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 
-from models.common.layers import one_hot_encode_grid, batch_one_hot_encode
+from models.common.layers import cnn_one_hot_encode_grid, cnn_batch_one_hot_encode
 from models.common.losses import huber_loss
 from models.dqn.network import DQNetwork
 from models.dqn.replay_buffer import ReplayBuffer
@@ -63,15 +63,13 @@ class DQNAgent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.q_network = DQNetwork(
-            input_size=self.input_size,
+            in_channels=self.num_cell_types,
             action_size=self.action_size,
-            hidden_layers=hidden_layers,
         ).to(self.device)
 
         self.target_network = DQNetwork(
-            input_size=self.input_size,
+            in_channels=self.num_cell_types,
             action_size=self.action_size,
-            hidden_layers=hidden_layers,
         ).to(self.device)
 
         hard_update(self.target_network, self.q_network)
@@ -108,7 +106,7 @@ class DQNAgent:
         if explore and random.random() < self.epsilon:
             return random.randint(0, self.action_size - 1)
 
-        state_tensor = one_hot_encode_grid(state, self.num_cell_types)
+        state_tensor = cnn_one_hot_encode_grid(state, self.num_cell_types)
         state_tensor = state_tensor.unsqueeze(0).to(self.device)
 
         with torch.no_grad():
@@ -138,8 +136,8 @@ class DQNAgent:
         )
 
         # --- One-hot encode ---
-        states_t = batch_one_hot_encode(states, self.num_cell_types).to(self.device)
-        next_states_t = batch_one_hot_encode(next_states, self.num_cell_types).to(self.device)
+        states_t = cnn_batch_one_hot_encode(states, self.num_cell_types).to(self.device)
+        next_states_t = cnn_batch_one_hot_encode(next_states, self.num_cell_types).to(self.device)
         actions_t = torch.LongTensor(actions).to(self.device)
         rewards_t = torch.FloatTensor(rewards).to(self.device)
         dones_t = torch.FloatTensor(dones).to(self.device)

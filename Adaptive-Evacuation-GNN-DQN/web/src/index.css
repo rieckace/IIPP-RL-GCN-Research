@@ -40,9 +40,9 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to allow scrolling from top */
   background-attachment: fixed;
-  overflow: hidden; /* Prevent scrolling for app feel */
+  overflow-y: auto; /* Re-enable scrolling for large grids like Mall */
 }
 
 /* Background Pattern */

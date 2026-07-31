@@ -5,17 +5,17 @@ import { GridRenderer } from './components/GridRenderer';
 export function App() {
   const { gameState, connected } = useWebSocket('ws://localhost:8000/stream');
   const [modelType, setModelType] = useState('dqn');
-  const [gridSize, setGridSize] = useState(10);
+  const [mapName, setMapName] = useState('office');
   
   const handleApply = async () => {
     try {
       await fetch('http://localhost:8000/configure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: modelType, grid_size: gridSize })
+        body: JSON.stringify({ model: modelType, map_name: mapName })
       });
     } catch (e) {
-      console.error("Failed to reconfigure server", e);
+      console.error("Failed to apply config", e);
     }
   };
 
@@ -24,7 +24,7 @@ export function App() {
       await fetch('http://localhost:8000/configure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: modelType, grid_size: gridSize })
+        body: JSON.stringify({ model: modelType, map_name: mapName })
       });
     } catch (e) {
       console.error("Failed to reset simulation", e);
@@ -66,16 +66,18 @@ export function App() {
           </div>
 
           <div className="control-group">
-            <label>Grid Size</label>
+            <label>Map Layout</label>
             <select 
-              value={gridSize} 
-              onChange={(e) => setGridSize(parseInt(e.target.value))}
-              disabled={modelType === 'dqn'} // DQN hardcoded to 10x10 architecture
+              value={mapName} 
+              onChange={(e) => setMapName(e.target.value)}
+              disabled={!connected}
             >
-              <option value={10}>10x10 (Trained)</option>
-              <option value={15}>15x15 (Zero-Shot)</option>
+              <option value="office">Office (Easy)</option>
+              <option value="apartment">Apartment (Med-Easy)</option>
+              <option value="school">School (Medium)</option>
+              <option value="hospital">Hospital (Hard)</option>
+              <option value="mall">Mall (Very Hard)</option>
             </select>
-            {modelType === 'dqn' && <small>DQN is locked to 10x10</small>}
           </div>
 
           <button className="btn-primary" onClick={handleApply}>

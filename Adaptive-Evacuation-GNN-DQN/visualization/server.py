@@ -36,19 +36,19 @@ app.add_middleware(
 class SimState:
     def __init__(self):
         self.model_type = "dqn"
-        self.grid_size = 10
+        self.map_name = "office"
         self.reset_requested = True
 
 sim_state = SimState()
 
 class ConfigRequest(BaseModel):
     model: str
-    grid_size: int
+    map_name: str
 
 @app.post("/configure")
 async def configure_simulation(req: ConfigRequest):
     sim_state.model_type = req.model
-    sim_state.grid_size = req.grid_size
+    sim_state.map_name = req.map_name
     sim_state.reset_requested = True
     return {"status": "ok"}
 
@@ -67,41 +67,31 @@ async def websocket_endpoint(websocket: WebSocket):
     is_marl = False
     
     try:
+        from environment.make_env import make_env
         while True:
             # Re-initialize if requested
             if sim_state.reset_requested:
-                logger.info(f"Re-initializing simulation: {sim_state.model_type} on {sim_state.grid_size}x{sim_state.grid_size}")
+                logger.info(f"Re-initializing simulation: {sim_state.model_type} on {sim_state.map_name}")
                 sim_state.reset_requested = False
                 
-                # Load config
-                config = load_config("configs/default.yaml", validate=False)
-                if sim_state.model_type == "marl":
-                    config = load_config("configs/marl.yaml", validate=False)
-                    
-                # Override grid size
-                config["grid"]["rows"] = sim_state.grid_size
-                config["grid"]["cols"] = sim_state.grid_size
+                # Use the new benchmark map factory
+                base_env = make_env(sim_state.map_name)
                 
-                is_marl = (sim_state.model_type == "marl")
+                # Fetch config back from the env since make_env built it
+                config = base_env.unwrapped._config if hasattr(base_env.unwrapped, '_config') else {}
+                # Fallback to load if not found
+                if not config:
+                    config = load_config("configs/default.yaml", validate=False)
                 
-                if is_marl:
-                    base_env = MARLEvacuationEnv(config)
-                    env = MARLGraphObservationWrapper(base_env)
-                    agent = MARLAgent(config)
-                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "marl", "best_model.pt")
-                elif sim_state.model_type == "hybrid":
-                    base_env = EvacuationEnv(config)
-                    env = HybridObservationWrapper(base_env)
-                    agent = HybridGNNDQNAgent(config)
-                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "hybrid", "best_model.pt")
-                elif sim_state.model_type == "gnn":
-                    base_env = EvacuationEnv(config)
-                    env = HybridObservationWrapper(base_env) # Assuming GNN uses graph obs
-                    agent = GNNDQNAgent(config)
-                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "gnn", "best_model.pt")
-                else: # dqn
-                    base_env = EvacuationEnv(config)
+                is_marl = False # Forced to false for Phase 1
+                
+                if sim_state.model_type == "dqn":
                     env = base_env # DQN takes flat obs directly
+                    agent = DQNAgent(config)
+                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "dqn", "best_model.pt")
+                else:
+                    # For phase 1, default everything to DQN or classical
+                    env = base_env
                     agent = DQNAgent(config)
                     ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "dqn", "best_model.pt")
                 

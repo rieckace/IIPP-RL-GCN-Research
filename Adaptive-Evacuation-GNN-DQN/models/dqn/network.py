@@ -2,65 +2,66 @@
 network.py
 
 Deep Q-Network architecture for the evacuation environment.
-Takes one-hot encoded grid observations and outputs Q-values for each action.
+Uses a Convolutional Neural Network (CNN) with Adaptive Max Pooling to allow
+for dynamic grid sizes (Zero-Shot Generalization).
 """
-
-from typing import List
 
 import torch
 import torch.nn as nn
 
-
 class DQNetwork(nn.Module):
-    """Feedforward Deep Q-Network.
+    """Convolutional Deep Q-Network.
 
     Architecture:
-        one-hot grid input (800) → Dense(256) → ReLU
-                                 → Dense(256) → ReLU
-                                 → Dense(128) → ReLU
-                                 → Dense(5)   → Q-values
+        Grid Input (B, 8, H, W)
+        → Conv2d(32) → ReLU
+        → Conv2d(64) → ReLU
+        → Conv2d(64) → ReLU
+        → AdaptiveMaxPool2d((2, 2))  [This enables scale-invariance!]
+        → Flatten
+        → Linear(256) → ReLU
+        → Linear(Action Size)
 
-    The input is a one-hot encoded grid: each of the 100 cells is
-    represented as an 8-dimensional one-hot vector (one per CellType),
-    giving 100 × 8 = 800 input features.
+    Adaptive pooling ensures that regardless of whether the input grid is
+    10x10 (Office) or 26x26 (Mall), the linear layers always receive a 
+    fixed-size flattened feature vector (64 * 2 * 2 = 256).
     """
 
     def __init__(
         self,
-        input_size: int = 800,
+        in_channels: int = 8,
         action_size: int = 5,
-        hidden_layers: List[int] | None = None,
     ) -> None:
-        """
-        Args:
-            input_size:    Dimension of the one-hot encoded input.
-            action_size:   Number of discrete actions.
-            hidden_layers: List of hidden layer sizes. Default: [256, 256, 128].
-        """
         super().__init__()
 
-        if hidden_layers is None:
-            hidden_layers = [256, 256, 128]
-
-        layers: list[nn.Module] = []
-        prev_size = input_size
-
-        for h_size in hidden_layers:
-            layers.append(nn.Linear(prev_size, h_size))
-            layers.append(nn.ReLU())
-            prev_size = h_size
-
-        layers.append(nn.Linear(prev_size, action_size))
-
-        self.network = nn.Sequential(*layers)
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+        
+        # Adaptive pooling scales any HxW feature map down to a fixed 2x2 grid
+        self.pool = nn.AdaptiveMaxPool2d((2, 2))
+        
+        self.fc = nn.Sequential(
+            nn.Linear(64 * 2 * 2, 256),
+            nn.ReLU(),
+            nn.Linear(256, action_size)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass.
 
         Args:
-            x: Input tensor of shape (batch_size, input_size).
+            x: Input tensor of shape (batch_size, in_channels, H, W).
 
         Returns:
             Q-values tensor of shape (batch_size, action_size).
         """
-        return self.network(x)
+        x = self.conv(x)
+        x = self.pool(x)
+        x = x.reshape(x.size(0), -1) # Flatten (B, 64, 2, 2) -> (B, 256)
+        return self.fc(x)
