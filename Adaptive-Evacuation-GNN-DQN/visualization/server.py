@@ -62,6 +62,12 @@ async def configure_simulation(req: ConfigRequest):
     sim_state.reset_requested = True
     return {"status": "ok"}
 
+@app.post("/spawn_agent")
+async def spawn_agent(row: int, col: int):
+    sim_state.agent_start = [row, col]
+    sim_state.reset_requested = True
+    return {"status": "ok"}
+
 def _coord_to_id(r, c, cols):
     if r == -1: return -1
     return r * cols + c
@@ -166,8 +172,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     active_agents = info["active_agents"]
                 else:
                     actv = not (terminated or truncated)
-                    if terminated and info.get("reason") in ["reached_exit", "hit_fire"]:
+                    if terminated and info.get("reason") == "hit_fire":
                         actv = False
+                    elif terminated and info.get("reason") == "reached_exit":
+                        actv = True # Keep agent visible on the exit cell!
                     else:
                         actv = True
                     active_agents = [actv]

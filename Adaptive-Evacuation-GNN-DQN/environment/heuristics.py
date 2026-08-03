@@ -52,9 +52,10 @@ class AStarPlanner:
                 return path
                 
             for nr, nc in grid.get_neighbors(current[0], current[1]):
-                # Heuristic completely ignores fire/smoke (agent's job to dodge them)
-                # But walls are fundamentally impassable
-                if grid.get_cell(nr, nc) == CellType.WALL:
+                # Treat walls, fire, and smoke as impassable so the dense reward
+                # explicitly guides the RL agent along the safest path around them.
+                cell_type = grid.get_cell(nr, nc)
+                if cell_type in (CellType.WALL, CellType.FIRE, CellType.SMOKE):
                     continue
                     
                 neighbor = (nr, nc)
