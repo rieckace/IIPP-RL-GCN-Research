@@ -29,15 +29,34 @@ def make_env(map_name="office", render_mode=None):
         raise ValueError(f"Unknown map name: {map_name}")
         
     # Inject map into config
-    config["grid"]["rows"] = rows
-    config["grid"]["cols"] = cols
+    # Pad everything to a fixed 30x30 grid for universal generalization
+    MAX_SIZE = 30
+    row_offset = (MAX_SIZE - rows) // 2
+    col_offset = (MAX_SIZE - cols) // 2
+    
+    # Generate background of walls for the 30x30 grid
+    padded_walls = []
+    for r in range(MAX_SIZE):
+        for c in range(MAX_SIZE):
+            if r < row_offset or r >= row_offset + rows or c < col_offset or c >= col_offset + cols:
+                padded_walls.append([r, c])
+                
+    # Offset the inner map entities
+    for w in entity_map["walls"]: padded_walls.append([w[0] + row_offset, w[1] + col_offset])
+    shifted_obstacles = [[o[0] + row_offset, o[1] + col_offset] for o in entity_map["obstacles"]]
+    shifted_exits = [[e[0] + row_offset, e[1] + col_offset] for e in entity_map["exits"]]
+    shifted_fires = [[f[0] + row_offset, f[1] + col_offset] for f in entity_map["fire_sources"]]
+    shifted_agent = [agent_start[0] + row_offset, agent_start[1] + col_offset]
+    
+    config["grid"]["rows"] = MAX_SIZE
+    config["grid"]["cols"] = MAX_SIZE
     
     config["map"] = {
-        "walls": entity_map["walls"],
-        "obstacles": entity_map["obstacles"],
-        "exits": entity_map["exits"],
-        "fire_sources": entity_map["fire_sources"],
-        "agent_start": [list(agent_start)]
+        "walls": padded_walls,
+        "obstacles": shifted_obstacles,
+        "exits": shifted_exits,
+        "fire_sources": shifted_fires,
+        "agent_start": [shifted_agent]
     }
     
     # Phase 1: Disable dynamic fire spread

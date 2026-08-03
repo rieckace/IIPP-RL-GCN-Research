@@ -23,9 +23,9 @@ def train_dqn(map_name="apartment", num_episodes=500, checkpoint_path="checkpoin
         "epsilon_min": 0.05,
         "epsilon_decay": 0.995,  # Faster decay for quick testing
         "learning_rate": 0.0005,
-        "batch_size": 128,
+        "batch_size": 32,
         "target_update_freq": 20,
-        "replay_buffer_size": 100000
+        "replay_buffer_size": 10000
     }
     
     agent = DQNAgent(config)
@@ -64,13 +64,12 @@ def train_dqn(map_name="apartment", num_episodes=500, checkpoint_path="checkpoin
             best_reward = episode_reward
             agent.save_checkpoint(checkpoint_path)
             
-        if ep % 20 == 0:
-            avg = sum(rewards[-20:]) / 20
-            print(f"Episode {ep}/{num_episodes} | Avg Reward (Last 20): {avg:.1f} | Epsilon: {agent.epsilon:.3f}")
+        avg = sum(rewards[-10:]) / len(rewards[-10:])
+        print(f"Episode {ep}/{num_episodes} | Reward: {episode_reward:.1f} | Avg (Last 10): {avg:.1f} | Eps: {agent.epsilon:.3f}")
             
     print("Training Complete!")
     return agent
 
 if __name__ == "__main__":
     os.makedirs("checkpoints/dqn", exist_ok=True)
-    train_dqn(map_name="apartment", num_episodes=150)
+    train_dqn(map_name="apartment", num_episodes=30)
