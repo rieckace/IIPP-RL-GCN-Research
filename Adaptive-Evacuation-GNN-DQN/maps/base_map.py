@@ -38,6 +38,8 @@ def parse_ascii_map(ascii_lines):
                 entity_map["obstacles"].append([r, c])
             elif char == 'E':
                 entity_map["exits"].append([r, c])
+            elif char == 'F':
+                entity_map["fire_sources"].append([r, c])
             elif char == 'A':
                 agent_start = (r, c)
             # '.' is implicitly empty, which is the default in Grid

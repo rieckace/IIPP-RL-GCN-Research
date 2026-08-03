@@ -30,11 +30,11 @@ class GraphObservationWrapper(gym.ObservationWrapper):
         rows = self.unwrapped.rows
         cols = self.unwrapped.cols
         num_nodes = rows * cols
-        num_cell_types = 8  # 0 to 7
+        num_cell_types = 9  # 8 one-hot + 1 visit count
         
         self.observation_space = gym.spaces.Dict({
             "node_features": gym.spaces.Box(
-                low=0.0, high=1.0, 
+                low=0.0, high=100.0, 
                 shape=(num_nodes, num_cell_types), 
                 dtype=np.float32
             ),

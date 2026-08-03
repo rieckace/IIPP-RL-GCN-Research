@@ -6,7 +6,7 @@ Experience replay buffer optimized for PyTorch Geometric graphs.
 
 from collections import deque
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 import numpy as np
 import torch

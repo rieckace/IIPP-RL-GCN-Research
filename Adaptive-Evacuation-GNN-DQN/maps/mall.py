@@ -4,7 +4,7 @@ from maps.base_map import parse_ascii_map
 MALL_ASCII = [
     "WWWWWWWWWWWWWWWWWWWWWWWWWW",
     "W.....W............W.....W",
-    "W..O..W...O....O...W..O..W",
+    "W..O..W...O.F..O...W..O..W",
     "W.....W............W.....W",
     "W.....WWWW......WWWW.....W",
     "W........................W",

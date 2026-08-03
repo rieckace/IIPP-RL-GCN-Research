@@ -10,7 +10,7 @@ HOSPITAL_ASCII = [
     "W....................W",
     "WWWWWWWW..WWWWWWWW..WW",
     "W....W......W........W",
-    "W.O..W.O....W..O...O.W",
+    "W.O..W.O..F.W..O...O.W",
     "W....W......W........W",
     "WW..WWWW..WWWWW..WWWWW",
     "W.........A..........W",

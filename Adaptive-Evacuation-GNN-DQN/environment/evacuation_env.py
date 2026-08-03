@@ -103,6 +103,7 @@ class EvacuationEnv(gym.Env):
         self._step_count = 0
         self._total_reward = 0.0
         self._rng: Optional[random.Random] = None
+        self.visit_counts = np.zeros((self.rows, self.cols), dtype=np.float32)
 
     # ------------------------------------------------------------------
     # Gymnasium API
@@ -135,9 +136,21 @@ class EvacuationEnv(gym.Env):
             "fire_sources": self._fire_sources,
         })
 
+        # Check if we should randomize start position (for training generalization)
+        agent_starts = self._agent_starts
+        if hasattr(self, "randomize_agent_start") and self.randomize_agent_start:
+            empty_cells = []
+            for r in range(self.rows):
+                for c in range(self.cols):
+                    if self.grid.get_cell(r, c) == CellType.EMPTY:
+                        empty_cells.append([r, c])
+            if empty_cells:
+                selected_start = self._rng.choice(empty_cells)
+                agent_starts = [selected_start]
+
         # Reset dynamic state
         self.state.reset(
-            agent_starts=self._agent_starts,
+            agent_starts=agent_starts,
             fire_sources=self._fire_sources,
             exit_positions=self._exits,
             wall_positions=self._walls,
@@ -146,9 +159,12 @@ class EvacuationEnv(gym.Env):
         # Sync agent onto grid
         self.state.sync_to_grid(self.grid)
 
-        # Reset counters
+        # Reset counters and visit counts
         self._step_count = 0
         self._total_reward = 0.0
+        self.visit_counts.fill(0.0)
+        for pos in self.state.agent_positions:
+            self.visit_counts[pos[0], pos[1]] = 1.0
 
         obs = self.state.to_observation(self.grid)
         info = self._build_info(reason="reset")
@@ -201,6 +217,9 @@ class EvacuationEnv(gym.Env):
             new_pos = agent_pos
             moved = False
 
+        # Increment visit counts for the new position
+        self.visit_counts[new_pos[0], new_pos[1]] += 1.0
+
         # --- 2. Compute reward based on the ORIGINAL destination cell ---
         reward, terminated, reason = compute_reward(
             old_pos=agent_pos,
@@ -210,6 +229,7 @@ class EvacuationEnv(gym.Env):
             stayed=stayed,
             reward_cfg=self.reward_config,
             dest_cell_override=dest_cell,
+            visit_count=self.visit_counts[new_pos[0], new_pos[1]],
         )
 
         # Place agent on grid (after reward computed, so we don't
@@ -273,7 +293,7 @@ class EvacuationEnv(gym.Env):
         Returns:
             {"node_features": ndarray, "edge_index": ndarray}
         """
-        return self.state.to_graph(self.grid)
+        return self.state.to_graph(self.grid, self.visit_counts)
 
     # ------------------------------------------------------------------
     # Internal helpers

@@ -5,7 +5,7 @@ APARTMENT_ASCII = [
     "WWWWWWWWWWWWWW",
     "W...W......E.W",
     "W.O.W........W",
-    "W.O.W...WWWW.W",
+    "W.O.W...WWWWFW",
     "W...W...W....W",
     "WW.WW...W..O.W",
     "W.......W..O.W",

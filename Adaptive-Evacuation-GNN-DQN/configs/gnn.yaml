@@ -6,9 +6,9 @@ environment:
   grid_cols: 10
 
 agent:
-  gamma: 0.99                    # Discount factor
+  gamma: 0.90                    # Discount factor (lower to force immediate exit)
   epsilon_start: 1.0             # Start with full random exploration
-  epsilon_decay: 0.997           # Slow decay
+  epsilon_decay: 0.998           # Slower decay for exploration on larger maps
   epsilon_min: 0.01              # Always keep 1% exploration
   learning_rate: 0.001           # Adam learning rate
   batch_size: 64                 # Mini-batch size for PyG Batching
@@ -16,7 +16,7 @@ agent:
   target_update_freq: 10         # Hard-copy Q->target every N episodes
 
 network:
-  gcn_hidden_dims: [64, 64, 64]  # 3 GCN layers for message passing
+  gcn_hidden_dims: [64, 64, 64, 64, 64]  # 5 GCN layers for message passing on large grids
   mlp_hidden_dims: [128, 64]     # 2 MLP layers for Q-value projection
 
 training:
@@ -24,7 +24,7 @@ training:
   max_steps_per_episode: 200     # Must match environment max_steps
   log_interval: 10               # Print metrics every N episodes
   checkpoint_interval: 100       # Save checkpoint every N episodes
-  early_stop_success_rate: 0.90  # Stop early if success rate exceeds this
+  early_stop_success_rate: 0.98  # Stop early if success rate exceeds this
   early_stop_window: 100         # Window for computing success rate
   seed: 42                       # Random seed for reproducibility
 

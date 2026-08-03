@@ -52,8 +52,19 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
         config.setdefault("training", {})["seed"] = seed
 
     checkpoint_dir = paths_cfg.get("checkpoint_dir", "checkpoints/gnn")
+    if not os.path.isabs(checkpoint_dir):
+        checkpoint_dir = os.path.join(PROJECT_ROOT, checkpoint_dir)
+    checkpoint_dir = os.path.normpath(checkpoint_dir)
+        
     plots_dir = paths_cfg.get("plots_dir", "results/plots")
+    if not os.path.isabs(plots_dir):
+        plots_dir = os.path.join(PROJECT_ROOT, plots_dir)
+    plots_dir = os.path.normpath(plots_dir)
+        
     logs_dir = paths_cfg.get("logs_dir", "results/logs")
+    if not os.path.isabs(logs_dir):
+        logs_dir = os.path.join(PROJECT_ROOT, logs_dir)
+    logs_dir = os.path.normpath(logs_dir)
 
     # --- Load environment config ---
     env_config_path = config.get("environment", {}).get("config_path", "configs/default.yaml")
@@ -62,18 +73,19 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     env_config = load_config(env_config_path)
 
     # --- Create environment and agent ---
-    base_env = EvacuationEnv(env_config)
-    env = GraphObservationWrapper(base_env)
+    from environment.make_env import make_env
+    import random
+    training_maps = ["office", "apartment", "school", "hospital"]
     
     agent = GNNDQNAgent(config)
     metrics = TrainingMetrics()
-
+ 
     # --- Training header ---
     print("=" * 60)
     print("  GNN-DQN Training - Adaptive Evacuation Environment")
     print("=" * 60)
     print(f"  Episodes:        {episodes}")
-    print(f"  Grid:            {base_env.rows}x{base_env.cols}")
+    print(f"  Grid:            Multi-scale (10x10 to 18x18)")
     print(f"  GCN Layers:      {config.get('network', {}).get('gcn_hidden_dims', [64, 64, 64])}")
     print(f"  MLP Layers:      {config.get('network', {}).get('mlp_hidden_dims', [128, 64])}")
     print(f"  Learning rate:   {agent.learning_rate}")
@@ -81,11 +93,17 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     print(f"  Device:          {agent.device}")
     print("=" * 60)
     print()
-
+ 
     start_time = time.time()
     best_success_rate = 0.0
-
+ 
     for episode in range(1, episodes + 1):
+        # Select map randomly for this episode to learn scale and layout invariance
+        map_name = random.choice(training_maps)
+        base_env = make_env(map_name)
+        base_env.randomize_agent_start = True  # Enable start state randomization for training generalization
+        env = GraphObservationWrapper(base_env)
+        
         # --- Run one episode ---
         obs, info = env.reset(seed=episode)
         total_reward = 0.0
@@ -96,7 +114,7 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
         while True:
             action = agent.act(obs, explore=True)
             next_obs, reward, terminated, truncated, info = env.step(action)
-            done = terminated or truncated
+            done = terminated
 
             agent.memory.push(obs, action, reward, next_obs, done)
 
@@ -109,7 +127,7 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
             total_reward += reward
             steps += 1
 
-            if done:
+            if terminated or truncated:
                 break
 
         # --- Post-episode updates ---
@@ -168,14 +186,16 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     final_path = os.path.join(checkpoint_dir, "final_model.pt")
     agent.save_checkpoint(final_path)
 
-    # --- Save metrics CSV ---
-    csv_path = os.path.join(logs_dir, "gnn_training_metrics.csv")
-    metrics.save_csv(csv_path)
-    print(f"\n[+] Metrics saved to: {csv_path}")
+    # --- Save metrics CSV and plots ---
+    try:
+        csv_path = os.path.join(logs_dir, "gnn_training_metrics.csv")
+        metrics.save_csv(csv_path)
+        print(f"\n[+] Metrics saved to: {csv_path}")
 
-    # --- Generate plots ---
-    plot_path = os.path.join(plots_dir, "gnn_training.png")
-    plot_training_curves(metrics.to_dict(), save_path=plot_path, title="GNN-DQN Training")
+        plot_path = os.path.join(plots_dir, "gnn_training.png")
+        plot_training_curves(metrics.to_dict(), save_path=plot_path, title="GNN-DQN Training")
+    except Exception as e:
+        print(f"\n[!] Warning: Failed to save metrics or plots: {e}")
 
     # --- Training summary ---
     total_time = time.time() - start_time

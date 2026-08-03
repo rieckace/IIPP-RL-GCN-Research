@@ -23,12 +23,13 @@ Develop a novel **GCN-Enhanced DQN** framework for adaptive emergency evacuation
 
 ---
 
-## 📌 Current Status — Phase 5 Complete ✅
-
-A fully functional **Gymnasium-compatible evacuation environment** with dynamic fire/smoke hazards, multi-objective rewards, and a GNN-ready graph state representation.
-A baseline **Double DQN agent** training pipeline is implemented, alongside a brand new **Graph Neural Network (GNN-DQN)** that utilizes PyTorch Geometric to interpret the environment's spatial structure. The GNN natively supports zero-shot transfer to larger grid sizes (e.g. training on 10x10 and evaluating on 15x15).
-A **Hybrid Heuristic System** integrates A* pathfinding dynamically into the GNN observations, boosting learning speed by 26%.
-Finally, a **Multi-Agent Reinforcement Learning (MARL)** subsystem has been integrated, allowing multiple agents to navigate simultaneously using Node-Specific Embedding Extractors, highlighting complex bottleneck challenges.
+## 🚀 Project Status
+- **Phase 1 (Completed)**: Core benchmark environment built with 5 layouts. Standard DQN baselines implemented. Discovered zero-shot spatial generalization flaw in pure DQN.
+- **Phase 2 (In Progress)**: Pivoted to **Graph Neural Network (GNN) + DQN Hybrid** to achieve >90% precision on unseen starting coordinates.
+  - Implemented True A* Path Distance dense reward.
+  - Implemented cell revisit penalties to prevent infinite loops.
+  - Injected static Fire hazards into all map parsers.
+  - Configured 9-channel state observation for GNN translation.
 
 ### Experiment Results: MARL Bottlenecks
 While single-agent models (DQN, GNN, Hybrid) successfully learn to evade fire and reach exits, the **Multi-Agent GNN** experiment (3 agents) resulted in a 0% success rate. The agents lack explicit inter-agent communication, causing them to physically block each other in narrow corridors (deadlocks) until the fire consumes them. This finding paves the way for future research into Communication Networks (CommNets).

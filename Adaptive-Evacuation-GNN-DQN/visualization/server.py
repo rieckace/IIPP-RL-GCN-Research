@@ -5,6 +5,7 @@ import json
 import logging
 from pydantic import BaseModel
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,11 +33,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/", response_class=HTMLResponse)
+async def get_dashboard():
+    index_path = os.path.join(os.path.dirname(__file__), "index.html")
+    with open(index_path, "r", encoding="utf-8") as f:
+        return f.read()
+
 # Global Simulation State
 class SimState:
     def __init__(self):
         self.model_type = "dqn"
         self.map_name = "office"
+        self.agent_start = None
         self.reset_requested = True
 
 sim_state = SimState()
@@ -44,11 +52,13 @@ sim_state = SimState()
 class ConfigRequest(BaseModel):
     model: str
     map_name: str
+    agent_start: list[int] | None = None
 
 @app.post("/configure")
 async def configure_simulation(req: ConfigRequest):
     sim_state.model_type = req.model
     sim_state.map_name = req.map_name
+    sim_state.agent_start = req.agent_start
     sim_state.reset_requested = True
     return {"status": "ok"}
 
@@ -69,31 +79,50 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         from environment.make_env import make_env
         while True:
-            # Re-initialize if requested
-            if sim_state.reset_requested:
+            # Re-initialize if env is None or reset is requested
+            if env is None or sim_state.reset_requested:
                 logger.info(f"Re-initializing simulation: {sim_state.model_type} on {sim_state.map_name}")
                 sim_state.reset_requested = False
                 
                 # Use the new benchmark map factory
                 base_env = make_env(sim_state.map_name)
                 
-                # Fetch config back from the env since make_env built it
-                config = base_env.unwrapped._config if hasattr(base_env.unwrapped, '_config') else {}
-                # Fallback to load if not found
-                if not config:
+                if sim_state.agent_start is not None:
+                    logger.info(f"Overriding agent start position to: {sim_state.agent_start}")
+                    base_env.unwrapped._agent_starts = [list(sim_state.agent_start)]
+                
+                # Load correct config for the specific model type to match agent network layout
+                if sim_state.model_type == "gnn":
+                    config = load_config("configs/gnn.yaml", validate=False)
+                elif sim_state.model_type == "hybrid":
+                    config = load_config("configs/hybrid.yaml", validate=False)
+                elif sim_state.model_type == "marl":
+                    config = load_config("configs/marl.yaml", validate=False)
+                else:
                     config = load_config("configs/default.yaml", validate=False)
                 
-                is_marl = False # Forced to false for Phase 1
+                is_marl = (sim_state.model_type == "marl")
                 
                 if sim_state.model_type == "dqn":
                     env = base_env # DQN takes flat obs directly
                     agent = DQNAgent(config)
                     ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "dqn", "best_model.pt")
-                else:
-                    # For phase 1, default everything to DQN or classical
-                    env = base_env
-                    agent = DQNAgent(config)
-                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "dqn", "best_model.pt")
+                elif sim_state.model_type == "gnn":
+                    from environment.wrappers import GraphObservationWrapper
+                    env = GraphObservationWrapper(base_env)
+                    agent = GNNDQNAgent(config)
+                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "gnn", "best_model.pt")
+                elif sim_state.model_type == "hybrid":
+                    from environment.wrappers import HybridObservationWrapper
+                    env = HybridObservationWrapper(base_env)
+                    agent = HybridGNNDQNAgent(config)
+                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "hybrid", "best_model.pt")
+                elif sim_state.model_type == "marl":
+                    from environment.wrappers import MARLGraphObservationWrapper
+                    env = MARLGraphObservationWrapper(base_env)
+                    marl_config = load_config("configs/marl.yaml", validate=False)
+                    agent = MARLAgent(marl_config)
+                    ckpt = os.path.join(PROJECT_ROOT, "checkpoints", "marl", "best_model.pt")
                 
                 # Load checkpoint if exists
                 if os.path.exists(ckpt) and hasattr(agent, "load_checkpoint"):

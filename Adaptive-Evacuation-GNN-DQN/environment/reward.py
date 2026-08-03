@@ -27,6 +27,7 @@ def compute_reward(
     stayed: bool,
     reward_cfg: RewardConfig,
     dest_cell_override: int | None = None,
+    visit_count: float = 1.0,
 ) -> tuple[float, bool, str]:
     """Compute the reward for a single transition.
 
@@ -41,6 +42,7 @@ def compute_reward(
                             from the grid. This is needed because the agent may
                             have already been placed on the grid, overwriting
                             the original cell (EXIT/FIRE).
+        visit_count:        Number of times agent has stepped on new_pos in this episode.
 
     Returns:
         (reward, terminated, reason)
@@ -65,27 +67,38 @@ def compute_reward(
 
     # --- Non-terminal: agent is standing in smoke ---
     if cell == CellType.SMOKE:
-        return reward_cfg.smoke_step, False, "in_smoke"
-
+        reward = reward_cfg.smoke_step
+        reason = "in_smoke"
     # --- Non-terminal: agent bumped into a wall (position unchanged) ---
-    if not moved and not stayed:
+    elif not moved and not stayed:
         return reward_cfg.wall_bump, False, "wall_bump"
-
     # --- Non-terminal: agent chose STAY ---
-    if stayed:
+    elif stayed:
         return reward_cfg.stay_penalty, False, "stayed"
-
     # --- Non-terminal: normal valid step ---
-    reward = reward_cfg.normal_step
+    else:
+        reward = reward_cfg.normal_step
+        reason = "normal_step"
+
+    # --- Count-Based Visited Penalty: penalize revisiting cells ---
+    if moved and not stayed:
+        if visit_count == 2.0:
+            reward += -2.0
+        elif visit_count >= 3.0:
+            reward += -10.0
 
     # --- Dense shaping: reward moving closer to the nearest exit ---
     if exits and reward_cfg.exit_progress_scale != 0.0 and moved and not stayed:
-        old_distance = min(
+        # Use actual path distance around walls for robust navigation
+        old_path = AStarPlanner.compute_path(grid, old_pos, set(exits))
+        new_path = AStarPlanner.compute_path(grid, new_pos, set(exits))
+        
+        old_distance = len(old_path) - 1 if old_path else min(
             AStarPlanner.manhattan_distance(old_pos, exit_pos) for exit_pos in exits
         )
-        new_distance = min(
+        new_distance = len(new_path) - 1 if new_path else min(
             AStarPlanner.manhattan_distance(new_pos, exit_pos) for exit_pos in exits
         )
         reward += reward_cfg.exit_progress_scale * (old_distance - new_distance)
 
-    return reward, False, "normal_step"
+    return reward, False, reason

@@ -31,16 +31,24 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     early_stop_window = train_cfg.get("early_stop_window", 100)
 
     checkpoint_dir = paths_cfg.get("checkpoint_dir", "checkpoints/hybrid")
+    if not os.path.isabs(checkpoint_dir):
+        checkpoint_dir = os.path.join(PROJECT_ROOT, checkpoint_dir)
+    checkpoint_dir = os.path.normpath(checkpoint_dir)
+        
     plots_dir = paths_cfg.get("plots_dir", "results/plots")
+    if not os.path.isabs(plots_dir):
+        plots_dir = os.path.join(PROJECT_ROOT, plots_dir)
+    plots_dir = os.path.normpath(plots_dir)
+        
     logs_dir = paths_cfg.get("logs_dir", "results/logs")
+    if not os.path.isabs(logs_dir):
+        logs_dir = os.path.join(PROJECT_ROOT, logs_dir)
+    logs_dir = os.path.normpath(logs_dir)
 
-    env_config_path = config.get("environment", {}).get("config_path", "configs/default.yaml")
-    if not os.path.isabs(env_config_path):
-        env_config_path = os.path.join(PROJECT_ROOT, env_config_path)
-    env_config = load_config(env_config_path)
-
-    base_env = EvacuationEnv(env_config)
-    env = HybridObservationWrapper(base_env)
+    # --- Create environment and agent ---
+    from environment.make_env import make_env
+    import random
+    training_maps = ["office", "apartment", "school", "hospital"]
     
     agent = HybridGNNDQNAgent(config)
     metrics = TrainingMetrics()
@@ -49,7 +57,7 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     print("  HYBRID GNN-A* Training - Adaptive Evacuation")
     print("=" * 60)
     print(f"  Episodes:        {episodes}")
-    print(f"  Grid:            {base_env.rows}x{base_env.cols}")
+    print(f"  Grid:            Multi-scale (10x10 to 18x18)")
     print(f"  Node Features:   {agent.node_feature_dim} (8 standard + 1 A*)")
     print("=" * 60)
     print()
@@ -58,6 +66,11 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     best_success_rate = 0.0
 
     for episode in range(1, episodes + 1):
+        # Select map randomly for this episode to learn scale and layout invariance
+        map_name = random.choice(training_maps)
+        base_env = make_env(map_name)
+        env = HybridObservationWrapper(base_env)
+        
         obs, info = env.reset(seed=(seed + episode if seed else episode))
         total_reward = 0.0
         episode_loss = 0.0
@@ -131,12 +144,15 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     final_path = os.path.join(checkpoint_dir, "final_model.pt")
     agent.save_checkpoint(final_path)
 
-    csv_path = os.path.join(logs_dir, "hybrid_training_metrics.csv")
-    metrics.save_csv(csv_path)
-    print(f"\n[+] Metrics saved to: {csv_path}")
+    try:
+        csv_path = os.path.join(logs_dir, "hybrid_training_metrics.csv")
+        metrics.save_csv(csv_path)
+        print(f"\n[+] Metrics saved to: {csv_path}")
 
-    plot_path = os.path.join(plots_dir, "hybrid_training.png")
-    plot_training_curves(metrics.to_dict(), save_path=plot_path, title="Hybrid GNN-A* Training")
+        plot_path = os.path.join(plots_dir, "hybrid_training.png")
+        plot_training_curves(metrics.to_dict(), save_path=plot_path, title="Hybrid GNN-A* Training")
+    except Exception as e:
+        print(f"\n[!] Warning: Failed to save metrics or plots: {e}")
 
     print(f"\n[OK] Training completed in {time.time() - start_time:.1f}s")
     env.close()

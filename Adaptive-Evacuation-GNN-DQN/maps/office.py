@@ -3,13 +3,13 @@ from maps.base_map import parse_ascii_map
 # Easy: 10x10 Office
 OFFICE_ASCII = [
     "WWWWWWWWWW",
-    "W........W",
-    "W..O.....W",
-    "W..O.....W",
-    "W........W",
-    "W.....O..W",
-    "W.....O..W",
     "W....A...W",
+    "W..O.....W",
+    "W..O.....W",
+    "W........W",
+    "W.F...O..W",
+    "W.....O..W",
+    "W........W",
     "W....E...W",
     "WWWWWWWWWW"
 ]

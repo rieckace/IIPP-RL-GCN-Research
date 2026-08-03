@@ -65,12 +65,12 @@ class EnvironmentState:
     # ------------------------------------------------------------------
     # Graph conversion (for future GNN consumption)
     # ------------------------------------------------------------------
-    def to_graph(self, grid: Grid) -> Dict[str, np.ndarray]:
+    def to_graph(self, grid: Grid, visit_counts: np.ndarray | None = None) -> Dict[str, np.ndarray]:
         """Convert the current grid state into a graph representation.
 
         Returns a dict with:
-            node_features : np.ndarray, shape (num_nodes, num_cell_types)
-                One-hot encoded cell types for each grid position.
+            node_features : np.ndarray, shape (num_nodes, num_cell_types + 1)
+                One-hot encoded cell types + visit count for each grid position.
                 Node ordering is row-major: node_id = row * cols + col.
 
             edge_index : np.ndarray, shape (2, num_edges)
@@ -91,6 +91,12 @@ class EnvironmentState:
                 node_id = r * cols + c
                 cell_val = grid.get_cell(r, c)
                 node_features[node_id, cell_val] = 1.0
+
+        # --- Append visit count as 9th feature dimension ---
+        if visit_counts is None:
+            visit_counts = np.zeros((rows, cols), dtype=np.float32)
+        visit_features = visit_counts.reshape((num_nodes, 1))
+        node_features = np.concatenate([node_features, visit_features], axis=1)
 
         # --- Edge index: 4-connected adjacency (bidirectional) ---
         src_list: List[int] = []

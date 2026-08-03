@@ -10,7 +10,7 @@ SCHOOL_ASCII = [
     "W................W",
     "WWWWWW..WWWWWWWWWW",
     "W.W........W.....W",
-    "W.W..O.....W..O..W",
+    "W.W..O..F..W..O..W",
     "W.W........W.....W",
     "W.WWWW..WWWWWW..WW",
     "W.......A........W",

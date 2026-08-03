@@ -10,20 +10,58 @@ import torch
 import torch.nn as nn
 
 class DQNetwork(nn.Module):
-    """Feedforward Deep Q-Network for fixed 30x30 grids."""
-    def __init__(self, in_channels: int = 8, action_size: int = 5):
+    """Convolutional Deep Q-Network.
+
+    Architecture:
+        Grid Input (B, 8, H, W)
+        → Conv2d(32) → ReLU
+        → Conv2d(64) → ReLU
+        → Conv2d(64) → ReLU
+        → AdaptiveMaxPool2d((2, 2))  [This enables scale-invariance!]
+        → Flatten
+        → Linear(256) → ReLU
+        → Linear(Action Size)
+
+    Adaptive pooling ensures that regardless of whether the input grid is
+    10x10 (Office) or 26x26 (Mall), the linear layers always receive a 
+    fixed-size flattened feature vector (64 * 2 * 2 = 256).
+    """
+
+    def __init__(
+        self,
+        in_channels: int = 8,
+        action_size: int = 5,
+    ) -> None:
         super().__init__()
-        # 30x30 grid * 8 channels = 7200 inputs
-        input_size = 30 * 30 * in_channels
-        self.network = nn.Sequential(
-            nn.Linear(input_size, 128),
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Linear(128, 64),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Linear(64, action_size)
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+        
+        # Adaptive pooling scales any HxW feature map down to a fixed 2x2 grid
+        self.pool = nn.AdaptiveMaxPool2d((2, 2))
+        
+        self.fc = nn.Sequential(
+            nn.Linear(64 * 2 * 2, 256),
+            nn.ReLU(),
+            nn.Linear(256, action_size)
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x arrives as (B, C, H, W). Flatten to (B, C*H*W)
-        x = x.reshape(x.size(0), -1)
-        return self.network(x)
+        """Forward pass.
+
+        Args:
+            x: Input tensor of shape (batch_size, in_channels, H, W).
+
+        Returns:
+            Q-values tensor of shape (batch_size, action_size).
+        """
+        x = self.conv(x)
+        x = self.pool(x)
+        x = x.reshape(x.size(0), -1) # Flatten (B, 64, 2, 2) -> (B, 256)
+        return self.fc(x)

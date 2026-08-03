@@ -122,25 +122,27 @@ class TestDQNetwork(unittest.TestCase):
 
     def test_forward_pass_shape(self):
         """Network produces correct output shape."""
-        net = DQNetwork(input_size=800, action_size=5, hidden_layers=[64, 32])
-        x = torch.randn(8, 800)  # batch of 8
+        net = DQNetwork(in_channels=8, action_size=5)
+        x = torch.randn(8, 8, 10, 10)  # batch of 8, 8 channels, 10x10 grid
         out = net(x)
         self.assertEqual(out.shape, (8, 5))
 
     def test_default_architecture(self):
-        """Default hidden layers are [256, 256, 128]."""
+        """Default architecture contains Conv2d and Linear layers."""
         net = DQNetwork()
-        # Count linear layers
-        linear_layers = [m for m in net.network if isinstance(m, torch.nn.Linear)]
-        self.assertEqual(len(linear_layers), 4)  # 3 hidden + 1 output
-        self.assertEqual(linear_layers[0].in_features, 800)
-        self.assertEqual(linear_layers[0].out_features, 256)
-        self.assertEqual(linear_layers[-1].out_features, 5)
+        conv_layers = [m for m in net.conv if isinstance(m, torch.nn.Conv2d)]
+        self.assertEqual(len(conv_layers), 3)
+        self.assertEqual(conv_layers[0].in_channels, 8)
+        self.assertEqual(conv_layers[0].out_channels, 32)
+        
+        fc_layers = [m for m in net.fc if isinstance(m, torch.nn.Linear)]
+        self.assertEqual(len(fc_layers), 2)
+        self.assertEqual(fc_layers[-1].out_features, 5)
 
     def test_gradient_flow(self):
         """Gradients flow through the network."""
-        net = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
-        x = torch.randn(2, 16, requires_grad=True)
+        net = DQNetwork(in_channels=8, action_size=5)
+        x = torch.randn(2, 8, 10, 10, requires_grad=True)
         out = net(x)
         loss = out.sum()
         loss.backward()
@@ -196,24 +198,24 @@ class TestTargetNetwork(unittest.TestCase):
 
     def test_hard_update_copies_exactly(self):
         """hard_update makes target == source."""
-        source = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
-        target = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
+        source = DQNetwork(in_channels=8, action_size=5)
+        target = DQNetwork(in_channels=8, action_size=5)
         hard_update(target, source)
         for sp, tp in zip(source.parameters(), target.parameters()):
             self.assertTrue(torch.equal(sp, tp))
 
     def test_soft_update_blends(self):
         """soft_update with tau=1.0 is equivalent to hard_update."""
-        source = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
-        target = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
+        source = DQNetwork(in_channels=8, action_size=5)
+        target = DQNetwork(in_channels=8, action_size=5)
         soft_update(target, source, tau=1.0)
         for sp, tp in zip(source.parameters(), target.parameters()):
             self.assertTrue(torch.allclose(sp, tp))
 
     def test_soft_update_tau_zero_no_change(self):
         """soft_update with tau=0.0 leaves target unchanged."""
-        source = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
-        target = DQNetwork(input_size=16, action_size=3, hidden_layers=[8])
+        source = DQNetwork(in_channels=8, action_size=5)
+        target = DQNetwork(in_channels=8, action_size=5)
         # Store original target params
         original_params = [p.clone() for p in target.parameters()]
         soft_update(target, source, tau=0.0)

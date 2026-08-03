@@ -5,7 +5,7 @@ Graph Neural Network (GNN) for the evacuation environment.
 Uses PyTorch Geometric (PyG) for message passing.
 """
 
-from typing import List
+from typing import List, Any
 
 import torch
 import torch.nn as nn
@@ -88,8 +88,9 @@ class GNNDQNetwork(nn.Module):
             x = conv(x, edge_index)
             x = F.relu(x)
 
-        # 2. Global Pooling (Node Embeddings -> Graph Embedding)
-        x = global_mean_pool(x, batch_idx)
+        # 2. Agent-Centric Pooling (Extract agent node embedding for scale-invariance)
+        agent_mask = (batch.x[:, 2] == 1.0)
+        x = x[agent_mask]
 
         # 3. MLP Head (Graph Embedding -> Q-Values)
         q_values = self.mlp_head(x)

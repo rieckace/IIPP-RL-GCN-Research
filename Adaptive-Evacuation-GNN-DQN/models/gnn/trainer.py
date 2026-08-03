@@ -53,7 +53,7 @@ class GNNDQNAgent:
 
         # Dimensions
         self.action_size = 5  # Up, Down, Left, Right, Stay
-        self.node_feature_dim = 8  # 0-7 CellTypes
+        self.node_feature_dim = 9  # 8 CellTypes + 1 visit_count
 
         # GNN Architecture
         gcn_dims = net_cfg.get("gcn_hidden_dims", [64, 64, 64])
