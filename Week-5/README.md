@@ -59,7 +59,7 @@ The code demonstrates how to:
 
 ### How to Run
 ```bash
-python simple_graph.py
+run_week.cmd
 ```
 This will output the graph properties to the console and save a visualization as `my_first_graph.png`.
 

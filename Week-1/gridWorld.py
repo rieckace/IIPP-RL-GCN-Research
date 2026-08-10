@@ -210,7 +210,7 @@ def run_trained_agent():
         state = next_state
 
         if done:
-            print("✅ Goal reached by the trained agent.")
+            print("Goal reached by the trained agent.")
             break
 
 episode_actions = ["RIGHT", "DOWN","UP","RIGHT", "DOWN","DOWN"]
@@ -225,7 +225,7 @@ for action in episode_actions:
     print("---------------\n")
     
     if done:
-        print("\n✅✅ Goal Reached.")
+        print("\nGoal Reached.")
         break
 
 

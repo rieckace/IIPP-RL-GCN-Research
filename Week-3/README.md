@@ -62,7 +62,7 @@ When comparing the Week 2 basic DQN with the Week 3 Improved DQN:
 
 ### How to Run
 ```bash
-python improved_dqn.py
+run_week.cmd
 ```
 
 ---
@@ -72,7 +72,7 @@ python improved_dqn.py
 Week 1  ✅  Q-Learning & GridWorld
 Week 2  ✅  Basic DQN on CartPole-v1
 Week 3  ✅  Experience Replay + Target Network    ← You are here
-Week 4  🔜  LunarLander-v2 + Hyperparameter Tuning
+Week 4  🔜  LunarLander-v3 + Hyperparameter Tuning
 Week 5–8    Graph Convolutional Networks (GCN)
 ```
 
