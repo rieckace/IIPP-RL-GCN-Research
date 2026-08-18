@@ -75,7 +75,7 @@ def train(config: dict, num_episodes: int | None = None, seed: int | None = None
     # --- Create environment and agent ---
     from environment.make_env import make_env
     import random
-    training_maps = ["office", "apartment", "school", "hospital"]
+    training_maps = ["office", "apartment", "school", "hospital", "mall"]
     
     agent = GNNDQNAgent(config)
     metrics = TrainingMetrics()
