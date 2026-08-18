@@ -1,6 +1,6 @@
-environment,checkpoint,episodes,successful_episodes,failed_episodes,success_rate,avg_steps,avg_reward,total_hazard_events,avg_hazard_events,path_efficiency,seed
-Apartment,checkpoints/gnn/best_model.pt,100,20,80,20.0,162.57,-184.02999999999992,3,0.03,N/A,42-141
-Office,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
-School,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
-Hospital,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
-Mall,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+environment,checkpoint,episodes,successful_episodes,failed_episodes,success_rate,avg_steps,avg_steps_success,avg_reward,total_hazard_events,avg_hazard_events,path_efficiency,seed
+office,best_model.pt,100,100,0,100.0%,6.83,6.83,148.99,10,0.10,0.8343,2000-2099
+apartment,best_model.pt,100,89,11,89.0%,27.41,12.00,56.61,7,0.07,0.9142,2000-2099
+school,best_model.pt,100,72,28,72.0%,81.43,16.79,-168.58,22,0.22,0.7718,2000-2099
+hospital,best_model.pt,100,77,23,77.0%,129.62,38.83,-357.59,23,0.23,0.8072,2000-2099
+mall,best_model.pt,100,35,65,35.0%,332.20,136.86,-1027.62,293,2.93,0.5446,2000-2099
