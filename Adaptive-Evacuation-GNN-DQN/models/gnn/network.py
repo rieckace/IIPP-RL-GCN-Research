@@ -34,7 +34,7 @@ class GNNDQNetwork(nn.Module):
 
     def __init__(
         self,
-        node_feature_dim: int = 9,  # 8 One-hot cell types + 1 Visit Count
+        node_feature_dim: int = 8,  # One-hot cell types
         action_size: int = 5,
         gcn_hidden_dims: List[int] = [64, 64, 64],
         mlp_hidden_dims: List[int] = [128, 64],

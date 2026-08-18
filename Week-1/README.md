@@ -135,7 +135,7 @@ Over multiple episodes, the agent learns which actions maximize cumulative rewar
 ## How to Run
 
 ```bash
-run_week.cmd
+python gridWorld.py
 ```
 
 ---

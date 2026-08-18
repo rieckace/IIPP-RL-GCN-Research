@@ -101,13 +101,13 @@ This is called **Reinforcement Learning (RL)**, and DQN is one of the most impor
 ### Prerequisites
 
 ```bash
-pip install -r requirements.txt
+pip install gymnasium torch numpy matplotlib
 ```
 
 ### Run Training
 
 ```bash
-run_week.cmd
+python dqn_cartpole.py
 ```
 
 ### Expected Output
@@ -118,7 +118,7 @@ Episode   2 | Score:   18.0 | Avg(50):  15.0 | ε: 0.990
 ...
 Episode 187 | Score:  475.0 | Avg(50): 476.2 | ε: 0.010
 ✅ SOLVED at episode 187!
-📊 Plot saved as dqn_results_fixed.png
+📊 Plot saved as dqn_results.png
 ```
 
 ---
@@ -140,13 +140,13 @@ The agent typically solves CartPole-v1 within **150–250 episodes**.
 ```
 cartpole-dqn/
 │
-├── CartPole.py           # Main implementation
+├── dqn_cartpole.py       # Main implementation
 │   ├── DQN               # Neural network class
 │   ├── ReplayBuffer      # Experience replay memory
 │   ├── DQNAgent          # Agent with act(), learn(), update_target()
 │   └── train()           # Training loop + plotting
 │
-├── dqn_results_fixed.png # Training reward plot (auto-generated)
+├── dqn_results.png       # Training reward plot (auto-generated)
 └── README.md             # This file
 ```
 
@@ -173,7 +173,7 @@ This project is **Week 2** of a structured 12-week research plan. The roadmap ah
 Week 1  ✅  Q-Learning & GridWorld
 Week 2  ✅  DQN on CartPole-v1          ← You are here
 Week 3  🔜  Experience Replay + Target Network (advanced)
-Week 4  🔜  LunarLander-v3 + Hyperparameter Tuning
+Week 4  🔜  LunarLander-v2 + Hyperparameter Tuning
 Week 5–8    Graph Convolutional Networks (GCN)
 Week 9–12   GCN-Enhanced DQN for IoT Edge Computing Research
 ```

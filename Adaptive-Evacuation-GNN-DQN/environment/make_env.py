@@ -43,7 +43,7 @@ def make_env(map_name="office", render_mode=None):
     if "dynamics" not in config:
         config["dynamics"] = {}
     if "fire_spread_probability" not in config["dynamics"]:
-        config["dynamics"]["fire_spread_probability"] = 0.01
+        config["dynamics"]["fire_spread_probability"] = 0.002
     if "smoke_radius" not in config["dynamics"]:
         config["dynamics"]["smoke_radius"] = 1
     
@@ -59,11 +59,11 @@ def make_env(map_name="office", render_mode=None):
     config["rewards"] = {
         "exit_reached": 150.0,
         "fire_hit": -50.0,
-        "smoke_step": -10.0, # Not used in Phase 1
-        "wall_bump": -10.0,  # As requested: -10 for wall/obstacle
-        "normal_step": -0.1, # As requested: -0.1 for valid movement
-        "stay_penalty": -2.0,# As requested: -2 for staying
-        "exit_progress_scale": 1.0 # DENSE REWARD: +1 for moving closer, -1 for moving away
+        "smoke_step": -2.0, 
+        "wall_bump": -5.0,  
+        "normal_step": -0.1, 
+        "stay_penalty": -5.0,
+        "exit_progress_scale": 1.0 
     }
     
     env = EvacuationEnv(config, render_mode=render_mode)

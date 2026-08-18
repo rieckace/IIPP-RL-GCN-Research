@@ -83,9 +83,9 @@ def compute_reward(
     # --- Count-Based Visited Penalty: penalize revisiting cells ---
     if moved and not stayed:
         if visit_count == 2.0:
-            reward += -2.0
+            reward += -1.0
         elif visit_count >= 3.0:
-            reward += -10.0
+            reward += -3.0
 
     # --- Dense shaping: reward moving closer to the nearest exit ---
     if exits and reward_cfg.exit_progress_scale != 0.0 and moved and not stayed:

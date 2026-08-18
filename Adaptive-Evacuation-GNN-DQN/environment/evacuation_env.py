@@ -163,10 +163,8 @@ class EvacuationEnv(gym.Env):
         self._step_count = 0
         self._total_reward = 0.0
         self.visit_counts.fill(0.0)
-        self._path_history = []
         for pos in self.state.agent_positions:
             self.visit_counts[pos[0], pos[1]] = 1.0
-            self._path_history.append((pos[0], pos[1]))
 
         obs = self.state.to_observation(self.grid)
         info = self._build_info(reason="reset")
@@ -174,7 +172,7 @@ class EvacuationEnv(gym.Env):
         if self.render_mode == "human":
             clear_screen()
             print(render_frame(
-                self.grid, 0, 0.0, 0.0, self.max_steps, reason="reset", path_history=self._path_history
+                self.grid, 0, 0.0, 0.0, self.max_steps, reason="reset"
             ))
 
         return obs, info
@@ -221,7 +219,6 @@ class EvacuationEnv(gym.Env):
 
         # Increment visit counts for the new position
         self.visit_counts[new_pos[0], new_pos[1]] += 1.0
-        self._path_history.append((new_pos[0], new_pos[1]))
 
         # --- 2. Compute reward based on the ORIGINAL destination cell ---
         reward, terminated, reason = compute_reward(
@@ -271,7 +268,6 @@ class EvacuationEnv(gym.Env):
                 self.max_steps,
                 action_taken=action,
                 reason=reason,
-                path_history=self._path_history,
             ))
 
         return obs, reward, terminated, truncated, info
@@ -285,7 +281,6 @@ class EvacuationEnv(gym.Env):
                 0.0,
                 self._total_reward,
                 self.max_steps,
-                path_history=self._path_history,
             )
         return None
 

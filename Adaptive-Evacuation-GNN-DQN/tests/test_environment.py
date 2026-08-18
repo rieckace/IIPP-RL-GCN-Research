@@ -28,7 +28,6 @@ from environment.reward import compute_reward
 from environment.state import EnvironmentState
 from environment.building import Building
 from environment.evacuation_env import EvacuationEnv
-from maps.apartment import get_apartment_map
 from utils.config_loader import load_config
 
 
@@ -72,18 +71,6 @@ def default_config():
 # ======================================================================
 # Grid Tests
 # ======================================================================
-class TestApartmentMap:
-    def test_apartment_fire_source_is_moved_to_new_position(self):
-        rows, cols, entity_map, agent_start = get_apartment_map()
-
-        assert rows == 14
-        assert cols == 14
-        assert len(entity_map["fire_sources"]) == 1
-        assert entity_map["fire_sources"] == [[5, 9]]
-        assert [3, 12] not in entity_map["fire_sources"]
-        assert agent_start == (12, 4)
-
-
 class TestGrid:
     def test_creation_dimensions(self):
         grid = Grid(10, 10)

@@ -52,7 +52,6 @@ def render_frame(
     max_steps: int,
     action_taken: int | None = None,
     reason: str = "",
-    path_history: list[tuple[int, int]] | None = None,
 ) -> str:
     """Render the current grid state as a coloured ANSI string.
 
@@ -64,7 +63,6 @@ def render_frame(
         max_steps:    Maximum allowed steps (for display).
         action_taken: Action id taken this step (or None on reset).
         reason:       Human-readable event description.
-        path_history: List of (r, c) coordinates the agent has visited.
 
     Returns:
         Multi-line string suitable for printing to the terminal.
@@ -77,16 +75,12 @@ def render_frame(
     lines.append(f"{C.BOLD}{C.CYAN}╔{'═' * (grid.cols * 2 + 1)}╗{C.RESET}")
 
     # --- Grid rows ---
-    for r, row in enumerate(grid.grid):
+    for row in grid.grid:
         cells = []
-        for c, cell in enumerate(row):
-            # Check if this cell is part of the path history and we reached the exit
-            if reason == "reached_exit" and path_history and (r, c) in path_history and cell == CellType.EMPTY:
-                colour, symbol = (_Colors.BG_GRAY + _Colors.GREEN, "*")
-            else:
-                colour, symbol = _CELL_DISPLAY.get(
-                    cell, (_Colors.GRAY, "?")
-                )
+        for cell in row:
+            colour, symbol = _CELL_DISPLAY.get(
+                cell, (_Colors.GRAY, "?")
+            )
             cells.append(f"{colour}{C.BOLD}{symbol}{C.RESET}")
         line = " ".join(cells)
         lines.append(f"{C.CYAN}║{C.RESET} {line} {C.CYAN}║{C.RESET}")
