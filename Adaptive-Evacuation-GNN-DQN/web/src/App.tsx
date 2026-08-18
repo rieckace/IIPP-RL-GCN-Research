@@ -136,7 +136,7 @@ export function App() {
               <span>Active Fire</span>
             </div>
             <div className="legend-item">
-              <div className="legend-color" style={{backgroundColor: '#3b82f6', borderRadius: '50%'}}>🏃</div>
+              <div className="legend-color" style={{backgroundColor: '#3b82f6', borderRadius: '50%'}}>🏃🏼‍➡️</div>
               <span>Evacuation Agent</span>
             </div>
           </div>

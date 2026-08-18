@@ -41,7 +41,7 @@ export const GridRenderer: React.FC<Props> = ({ state, onCellClick }) => {
               {cellVal === 6 && <span className="fire-emoji">🔥</span>}
               {activeAgents.map(agent => (
                 <div key={agent.id} className="agent-wrapper">
-                  <span className="agent-emoji">🏃</span>
+                  <span className="agent-emoji">🏃🏼‍➡️</span>
                 </div>
               ))}
             </div>

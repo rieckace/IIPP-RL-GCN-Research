@@ -82,7 +82,7 @@ pred = model(data).argmax(dim=1)
 correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
 acc = int(correct) / int(data.test_mask.sum())
 
-print(f"\n✅ Custom Graph Test Accuracy: {acc*100:.1f}%")
+print(f"\nCustom Graph Test Accuracy: {acc*100:.1f}%")
 print("Predictions for all nodes:", pred.tolist())
 print("Actual truth for all nodes:", data.y.tolist())
 

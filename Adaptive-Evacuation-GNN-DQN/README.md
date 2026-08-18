@@ -103,6 +103,8 @@ E  ·  ·  ·  ·  ·  ·  ·  ·  ·
 
 ### Environment Specifications
 
+> Note: the apartment layout now uses a different fire cell location than before, so any apartment-specific evaluation should use the updated map definition in [maps/apartment.py](maps/apartment.py).
+
 | Property | Details |
 |---|---|
 | **Grid Size** | 10×10 (configurable) |

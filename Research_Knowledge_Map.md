@@ -73,10 +73,11 @@ A structured overview of concepts and progress for **IIPP-RL-GCN Research**.
 
 ---
 
-## Next Actions
+## 5. Next Actions / Active Focus
+*   **Action:** Build the GNN-DQN Architecture.
+*   **Rationale:** Standard DQN fails at spatial generalization on raw grids (requires exact coordinate memory). A GNN will mathematically map the grid structure, allowing the agent to spawn anywhere and instantly find the exit.
+*   **Dependencies:** `environment/graph_utils.py` needs to be built to feed PyG Graphs to `models/gnn/network.py`.
 
-1. **Phase 2:** Build DQN agent with Experience Replay, Target Network, and training loop for the evacuation environment.
-2. **Phase 3:** Implement GNN feature extractor (GCN/GAT) using `get_graph_observation()`.
-3. **Phase 4:** Fuse GNN encoder with DQN into hybrid GNN-DQN architecture.
-4. **Phase 5:** Baselines (A*, random, vanilla DQN), ablation studies, statistical evaluation.
-5. **Phase 6:** Draft research paper with methodology, experiments, and results.
+## 6. Architecture & Rewards Updates
+*   **Dense Reward (A* Distance):** The environment now uses A* shortest-path distance (rather than naive Manhattan distance) for dense rewards, preventing the agent from getting stuck behind walls.
+*   **Revisit Penalty:** Added a 9th observation channel tracking cell visit counts. Revisiting cells carries heavy negative penalties to eliminate looping behavior.

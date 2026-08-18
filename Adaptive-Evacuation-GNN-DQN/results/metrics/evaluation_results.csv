@@ -1,0 +1,6 @@
+environment,checkpoint,episodes,successful_episodes,failed_episodes,success_rate,avg_steps,avg_reward,total_hazard_events,avg_hazard_events,path_efficiency,seed
+Apartment,checkpoints/gnn/best_model.pt,100,20,80,20.0,162.57,-184.02999999999992,3,0.03,N/A,42-141
+Office,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+School,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+Hospital,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
+Mall,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A
