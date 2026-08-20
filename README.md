@@ -1,51 +1,46 @@
-# NSTC IIPP Taiwan Internship - Deep Reinforcement Learning Research
+# Adaptive Evacuation — GCN-Double-DQN Research Project
 
-Welcome to the repository for my research internship under the National Science and Technology Council (NSTC) International Internship Pilot Program (IIPP) in Taiwan. 
+This repository is the cleaned research codebase derived from the internship implementation. It contains only the components required for the active single-agent evacuation research program.
 
-This repository chronicles a 12-week research journey focused on **Deep Reinforcement Learning (DRL)**, **Graph Neural Networks (GNN)**, and their application to **Adaptive Building Evacuation Systems**.
+## Research focus
 
-## 📖 Internship Overview
+Graph-structured reinforcement learning for adaptive indoor evacuation under dynamic fire/smoke hazards.
 
-Over the course of 12 weeks, this internship progressed from fundamental Reinforcement Learning concepts to advanced, state-of-the-art hybrid AI architectures. The research culminated in the development of a novel evacuation system that dynamically routes agents away from spreading hazards (fire and smoke) in real-time.
+## Active models
 
-### Weekly Progression
+- CNN-Double-DQN baseline
+- GCN-Double-DQN proposed baseline
+- A* / hazard-aware A* reference
 
-*   **Week 1 & 2**: Fundamentals of RL, Q-Learning, and environment design. (Classic control tasks like CartPole).
-*   **Week 3 & 4**: Deep Q-Networks (DQN) theory, experience replay, target networks, and PyTorch implementations.
-*   **Week 5**: Introduction to Graph Neural Networks (GNN) for spatial representations and pathfinding.
-*   **Week 6**: Message Passing Neural Networks (MPNN) and GCNs applied to structured grid environments.
-*   **Week 7**: Advanced GNN architectures (GAT, GraphSAGE) and dynamic graph processing.
-*   **Week 8 & 9**: Hybridizing GCNs with DQNs. Encoding dynamic hazards into graphs for the RL agent.
-*   **Week 10**: Multi-Agent Reinforcement Learning (MARL) concepts. Cooperative vs. Competitive environments.
-*   **Week 11**: Evaluation metrics, benchmark testing, and environment design for complex evacuation simulations.
-*   **Week 12**: Final project consolidation, model tuning, and research report writing.
+Hybrid GNN-A* and MARL implementations are intentionally excluded from the active codebase.
 
-## 🚀 Final Project: Adaptive Evacuation GNN-DQN
+## Repository structure
 
-The capstone project of this internship is located in the `Adaptive-Evacuation-GNN-DQN/` directory.
+```text
+Adaptive-Evacuation-GNN-DQN/
+├── baselines/              Classical reference agents
+├── configs/                Active experiment configurations
+├── environment/            Grid, hazards, rewards, maps interface
+├── maps/                   Office, Apartment, School, Hospital, Mall
+├── models/
+│   ├── common/
+│   ├── dqn/                CNN-DQN baseline
+│   └── gnn/                GCN-Double-DQN model
+├── evaluation/             Evaluation and statistics
+├── training/               Training/evaluation entry points
+├── visualization/          Research figures and trajectory views
+├── tests/                  Automated tests
+├── research/               New experiment infrastructure
+├── docs/                   Research plan and implementation audit
+└── paper/manuscript/       IEEE LaTeX manuscript
+```
 
-### Project Description
-Traditional evacuation systems rely on static exit signs, which can be fatal if the prescribed path is blocked by dynamic hazards like fire or smoke. This project introduces a hybrid **GCN-DQN (Graph Convolutional Network + Deep Q-Network)** architecture. 
+## Important
 
-The environment is modeled as a dynamic graph where:
-*   **Nodes** represent physical grid cells (empty, wall, fire, smoke, exit).
-*   **Edges** represent traversable paths.
-*   **Node Features** dynamically update as fire spreads.
+The existing internship results are not automatically treated as final evidence for new claims. New experiments will be registered and reproduced under controlled conditions before being used in the manuscript.
 
-The GCN processes the spatial dependencies and hazard propagation, passing an enriched spatial embedding to the DQN, which determines the optimal action (Up, Down, Left, Right, Stay) for the evacuating agent.
-
-### Key Features
-*   **Dynamic Fire & Smoke Spread**: Hazards probabilistically spread across the grid during the episode.
-*   **Real-Time Rerouting**: The agent learns to adapt its path when preferred routes are blocked.
-*   **Graph-Based State Representation**: Highly scalable to different floor plans without retraining from scratch.
-
-## 🛠️ Repository Structure
-
-*   `Week-1/` to `Week-12/`: Weekly learning materials, notes, scripts, and checkpoints.
-*   `Adaptive-Evacuation-GNN-DQN/`: The complete codebase for the final evacuation project.
-*   `Final_Report_Rikesh_Yadav.docx`: The comprehensive final internship report.
-*   `IIPP_Term_Report_Rikesh_Yadav.pdf`: The mid-term evaluation report.
-
-## 📜 Acknowledgements
-
-I would like to express my sincere gratitude to the NSTC IIPP program and my advisors in Taiwan for providing this incredible research opportunity, guidance, and resources throughout this internship.
+See:
+- `docs/RESEARCH_UPGRADE_PLAN.md`
+- `docs/IMPLEMENTATION_AUDIT.md`
+- `docs/EXPERIMENT_REGISTER.md`
+- `docs/PROJECT_SCOPE.md`

@@ -1,1 +1,0 @@
-"""Run training placeholder script."""

@@ -1,1 +1,0 @@
-"""Export results placeholder script."""

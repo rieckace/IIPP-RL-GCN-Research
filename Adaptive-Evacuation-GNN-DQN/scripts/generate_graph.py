@@ -1,1 +1,0 @@
-"""Generate graph placeholder script."""

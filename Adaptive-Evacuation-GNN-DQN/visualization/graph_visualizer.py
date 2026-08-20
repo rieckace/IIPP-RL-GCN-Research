@@ -1,1 +1,0 @@
-"""Graph visualizer placeholder."""

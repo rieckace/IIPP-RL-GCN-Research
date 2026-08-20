@@ -2,24 +2,40 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Temp files
-tempCodeRunnerFile*
+*.so
 
 # Virtual environments
 .env
 .venv/
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
+env/
+venv/
 
 # Jupyter
 .ipynb_checkpoints/
 
-# OneNote
-*.onetoc2
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Project-specific: generated outputs
+checkpoints/
+results/logs/
+*.egg-info/
+
+# Pytest
+.pytest_cache/
+
+# Distribution
+dist/
+build/
+
+# Logs
+*.log
