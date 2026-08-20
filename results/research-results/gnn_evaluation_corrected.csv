@@ -1,0 +1,6 @@
+environment,episodes,successful_episodes,failed_episodes,success_rate,avg_steps,avg_steps_success,avg_reward,total_hazard_events,avg_hazard_events,path_efficiency,seed_start,seed_end
+office,100,14,86,0.14,160.81,69.5,-712.0330000000006,440,4.4,0.5642434179871287,2000,2099
+apartment,100,0,100,0.0,196.02,0.0,-894.8210000000004,2,0.02,nan,2000,2099
+school,100,8,92,0.08,262.34,142.25,-1180.333,25,0.25,0.39206136135717873,2000,2099
+hospital,100,0,100,0.0,464.03,0.0,-2208.353,36,0.36,nan,2000,2099
+mall,100,1,99,0.01,487.81,47.0,-2203.6509999999976,3,0.03,0.0851063829787234,2000,2099
